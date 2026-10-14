@@ -45,6 +45,10 @@ Para usarla, abre `mi-u.html` en cualquier navegador moderno.
 - [ ] Pruebas unitarias para la lógica de fechas y estados
 - [ ] Atajos de teclado
 
+## Pendientes
+
+- [ ] Migrar a Node 24 LTS. Node 25 ya no tiene soporte y Vitest 5 no lo admite; por eso Vitest sigue en 4.1.
+
 ## Cómo contribuir o probar cambios
 
 1. Clona el repositorio.

@@ -1,0 +1,39 @@
+@import 'tailwindcss';
+
+/* Colores y tipografía de mi-u.html. El modo oscuro sigue la preferencia del sistema.
+   "static" emite siempre todas las variables, aunque ninguna clase las use todavía. */
+@theme static {
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --color-fondo: #f4f5fa;
+  --color-tarjeta: #ffffff;
+  --color-texto: #1d2330;
+  --color-tenue: #6b7280;
+  --color-borde: #e3e6ee;
+  --color-acento: #4f46e5;
+  --color-acento-suave: rgba(79, 70, 229, 0.12);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-fondo: #0f1220;
+    --color-tarjeta: #171b2e;
+    --color-texto: #e6e8f0;
+    --color-tenue: #9aa3b8;
+    --color-borde: #262c44;
+    --color-acento: #818cf8;
+    --color-acento-suave: rgba(129, 140, 248, 0.15);
+  }
+}
+
+@layer base {
+  html {
+    /* mi-u.html usa el interlineado por defecto del navegador. */
+    line-height: normal;
+  }
+
+  body {
+    min-height: 100vh;
+    background-color: var(--color-fondo);
+    color: var(--color-texto);
+  }
+}

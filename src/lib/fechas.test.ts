@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { diaEnBogota } from './fechas.ts';
+import { aIsoBogota, diaEnBogota, esIsoBogota } from './fechas.ts';
 
 describe('diaEnBogota', () => {
   afterEach(() => {
@@ -15,5 +15,29 @@ describe('diaEnBogota', () => {
     // una implementación que use la zona del sistema devolvería 2026-10-15.
     expect(new Date().getDate()).toBe(15);
     expect(diaEnBogota()).toBe('2026-10-14');
+  });
+});
+
+describe('aIsoBogota', () => {
+  it('escribe la hora de Bogotá con el desfase -05:00', () => {
+    expect(aIsoBogota(Date.parse('2026-10-21T01:00:00Z'))).toBe('2026-10-20T20:00:00-05:00');
+  });
+});
+
+describe('esIsoBogota', () => {
+  it('acepta una fecha en el formato que se guarda', () => {
+    expect(esIsoBogota('2026-10-20T20:00:00-05:00')).toBe(true);
+  });
+
+  it.each([
+    '2026-10-21T01:00:00Z',
+    '2026-10-20T20:00-05:00',
+    '2026-02-30T10:00:00-05:00',
+    '2026-10-20T24:00:00-05:00',
+    'mañana',
+    Date.parse('2026-10-20T20:00:00-05:00'),
+    null,
+  ])('rechaza %j', (valor) => {
+    expect(esIsoBogota(valor)).toBe(false);
   });
 });

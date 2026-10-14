@@ -1,0 +1,23 @@
+# Dependencias
+node_modules/
+
+# Builds y caché
+dist/
+build/
+.vite/
+coverage/
+*.tsbuildinfo
+
+# Variables de entorno locales
+.env
+.env.local
+.env.*.local
+
+# Editores y sistema
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+*.log
+npm-debug.log*

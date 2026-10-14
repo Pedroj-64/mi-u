@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mi U</title>
+<style>
+:root{
+  --bg:#f4f5fa; --card:#ffffff; --text:#1d2330; --muted:#6b7280; --border:#e3e6ee;
+  --accent:#4f46e5; --accent-soft:rgba(79,70,229,.12);
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#0f1220; --card:#171b2e; --text:#e6e8f0; --muted:#9aa3b8; --border:#262c44; --accent:#818cf8; --accent-soft:rgba(129,140,248,.15); }
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+header{text-align:center;padding:36px 16px 12px}
+header h1{margin:0;font-size:30px;letter-spacing:-.5px}
+header p{margin:6px 0 0;color:var(--muted);text-transform:capitalize}
+main{max-width:1100px;margin:0 auto;padding:16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;min-width:0}
+.card.wide{grid-column:1/-1}
+.card h2{margin:0 0 2px;font-size:17px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.card .hint{margin:0 0 14px;color:var(--muted);font-size:13px}
+.hint{color:var(--muted);font-size:13px}
+.form{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.form>*{flex:1 1 150px;min-width:0}
+input,select{padding:9px 10px;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--text);font:inherit;font-size:13px;width:100%}
+button{cursor:pointer;border:0;border-radius:8px;padding:8px 12px;background:var(--accent);color:#fff;font:inherit;font-size:13px;white-space:nowrap}
+button:disabled{opacity:.35;cursor:not-allowed}
+button.ghost{background:transparent;color:var(--muted);padding:6px 8px}
+button.ghost:hover{color:var(--text)}
+button.soft{background:var(--accent-soft);color:var(--accent)}
+.row{display:flex;gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)}
+.row:last-child{border-bottom:0}
+.row .name{flex:0 0 165px;font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row input[type=text]{flex:1;min-width:0}
+.row input[type=checkbox]{width:18px;height:18px;flex:0 0 auto;accent-color:var(--accent)}
+.grow{flex:1;min-width:0}
+.ttl{font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis}
+.sub{font-size:12px;color:var(--muted);margin-top:2px}
+.row.done .ttl{text-decoration:line-through;opacity:.55}
+.badge{font-size:12px;padding:3px 9px;border-radius:999px;background:var(--border);color:var(--muted);white-space:nowrap}
+.badge.ok{background:rgba(22,163,74,.15);color:#16a34a}
+.badge.bad{background:rgba(220,38,38,.15);color:#dc2626}
+.badge.warn{background:rgba(217,119,6,.15);color:#d97706}
+@media (max-width:520px){
+  .row{flex-wrap:wrap}
+  .row .name{flex-basis:100%}
+  .row input[type=text]{flex-basis:calc(100% - 90px)}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Mi U</h1>
+  <p id="fecha"></p>
+</header>
+
+<main>
+
+  <section class="card wide">
+    <h2>Entregas</h2>
+    <p class="hint">Agrega una entrega con su fecha límite. Las vencidas y las que vencen pronto aparecen destacadas.</p>
+    <button id="btn-avisos" class="soft" style="display:none" onclick="pedirAvisos()">Activar avisos del navegador</button>
+    <div class="form">
+      <select id="entrega-materia"></select>
+      <input id="entrega-texto" type="text" placeholder="Descripción (ej. Taller 3)">
+      <input id="entrega-fecha" type="datetime-local">
+      <button onclick="agregarEntrega()">Agregar</button>
+    </div>
+    <div id="lista-entregas"></div>
+  </section>
+
+  <section class="card">
+    <h2>Clases virtuales</h2>
+    <p class="hint">Enlace de Meet, Zoom o Teams de cada materia.</p>
+    <div id="lista-clase"></div>
+  </section>
+
+  <section class="card">
+    <h2>Aula virtual (Moodle)</h2>
+    <p class="hint">Aula de cada materia en la plataforma de la universidad.</p>
+    <div id="lista-moodle"></div>
+  </section>
+
+  <section class="card">
+    <h2>Classroom</h2>
+    <p class="hint">Clase de cada materia en Google Classroom.</p>
+    <div class="form" style="margin-top:0">
+      <button class="soft" style="width:100%" onclick="abrir('https://classroom.google.com')">Abrir Google Classroom</button>
+    </div>
+    <div id="lista-classroom"></div>
+  </section>
+
+  <section class="card">
+    <h2>Drive</h2>
+    <p class="hint">Acceso rápido a tu Drive y a carpetas que uses seguido.</p>
+    <div class="form" style="margin-top:0">
+      <button class="soft" style="width:100%" onclick="abrir('https://drive.google.com')">Abrir Google Drive</button>
+    </div>
+    <div id="lista-drive"></div>
+    <div class="form">
+      <input id="drive-nombre" type="text" placeholder="Nombre (ej. Carpeta de PETI)">
+      <input id="drive-url" type="text" placeholder="Enlace">
+      <button onclick="agregarDrive()">Guardar</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Mis materias</h2>
+    <p class="hint">Las materias aparecen en todas las secciones.</p>
+    <div id="lista-materias"></div>
+    <div class="form">
+      <input id="nueva-materia" type="text" placeholder="Nueva materia">
+      <button onclick="agregarMateria()">Agregar</button>
+    </div>
+  </section>
+
+</main>
+
+<script>
+const KEY = 'mi-u-v1';
+const MATERIAS_BASE = [
+  'Infraestructura Computacional',
+  'Infraestructura de Comunicaciones',
+  'Dirección Estratégica de T.I.',
+  'Programación Concurrente',
+  'Ingeniería de Software',
+  'Ecuaciones Diferenciales',
+  'Estructura de Datos'
+];
+
+const $ = s => document.querySelector(s);
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function cargar() {
+  try {
+    const d = JSON.parse(localStorage.getItem(KEY));
+    if (d && Array.isArray(d.materias)) return d;
+  } catch (e) {}
+  return {
+    materias: MATERIAS_BASE.map(n => ({id: uid(), nombre: n, clase: '', moodle: '', classroom: ''})),
+    entregas: [],
+    drive: []
+  };
+}
+let S = cargar();
+function guardar() { localStorage.setItem(KEY, JSON.stringify(S)); }
+
+function abrir(url) {
+  if (!url) return;
+  if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+  window.open(url, '_blank', 'noopener');
+}
+function abrirLink(id, campo) {
+  const m = S.materias.find(x => x.id === id);
+  if (m) abrir(m[campo]);
+}
+function abrirDrive(id) {
+  const l = S.drive.find(x => x.id === id);
+  if (l) abrir(l.url);
+}
+function nombreMateria(id) {
+  const m = S.materias.find(x => x.id === id);
+  return m ? m.nombre : 'Materia eliminada';
+}
+
+/* ---------- Materias ---------- */
+function agregarMateria() {
+  const i = $('#nueva-materia');
+  const n = i.value.trim();
+  if (!n) return;
+  S.materias.push({id: uid(), nombre: n, clase: '', moodle: '', classroom: ''});
+  i.value = '';
+  guardar(); renderTodo();
+}
+function quitarMateria(id) {
+  const m = S.materias.find(x => x.id === id);
+  if (!m || !confirm(`¿Quitar "${m.nombre}"? También se borran sus links y entregas.`)) return;
+  S.materias = S.materias.filter(x => x.id !== id);
+  S.entregas = S.entregas.filter(e => e.materia !== id);
+  guardar(); renderTodo();
+}
+function setLink(id, campo, val) {
+  const m = S.materias.find(x => x.id === id);
+  if (!m) return;
+  m[campo] = val.trim();
+  guardar(); renderTodo();
+}
+function renderMaterias() {
+  $('#lista-materias').innerHTML = S.materias.length
+    ? S.materias.map(m => `
+      <div class="row">
+        <span class="grow ttl">${esc(m.nombre)}</span>
+        <button class="ghost" onclick="quitarMateria('${m.id}')" title="Quitar">✕</button>
+      </div>`).join('')
+    : '<p class="hint">Agrega tus materias para empezar.</p>';
+}
+function renderLinks(campo, contenedor) {
+  const el = $('#' + contenedor);
+  if (!S.materias.length) { el.innerHTML = '<p class="hint">Primero agrega tus materias.</p>'; return; }
+  el.innerHTML = S.materias.map(m => `
+    <div class="row">
+      <span class="name" title="${esc(m.nombre)}">${esc(m.nombre)}</span>
+      <input type="text" placeholder="Pega el enlace" value="${esc(m[campo])}" onchange="setLink('${m.id}','${campo}',this.value)">
+      <button onclick="abrirLink('${m.id}','${campo}')" ${m[campo] ? '' : 'disabled'}>Abrir</button>
+    </div>`).join('');
+}
+function renderSelectMaterias() {
+  $('#entrega-materia').innerHTML = S.materias.map(m => `<option value="${m.id}">${esc(m.nombre)}</option>`).join('');
+}
+
+/* ---------- Entregas ---------- */
+function agregarEntrega() {
+  const texto = $('#entrega-texto').value.trim();
+  const fecha = $('#entrega-fecha').value;
+  const materia = $('#entrega-materia').value;
+  if (!texto || !fecha || !materia) { alert('Completa materia, descripción y fecha.'); return; }
+  S.entregas.push({id: uid(), materia, texto, fecha: new Date(fecha).getTime(), hecha: false, avisada: false});
+  $('#entrega-texto').value = '';
+  $('#entrega-fecha').value = '';
+  guardar(); renderTodo();
+}
+function toggleEntrega(id) {
+  const e = S.entregas.find(x => x.id === id);
+  if (!e) return;
+  e.hecha = !e.hecha;
+  guardar(); renderTodo();
+}
+function borrarEntrega(id) {
+  S.entregas = S.entregas.filter(x => x.id !== id);
+  guardar(); renderTodo();
+}
+function estado(e) {
+  if (e.hecha) return {txt: 'Entregada', cls: 'ok'};
+  const d = e.fecha - Date.now();
+  if (d < 0) return {txt: 'Vencida', cls: 'bad'};
+  const h = d / 3600000;
+  if (h < 24) return {txt: 'Menos de 24 h', cls: 'warn'};
+  return {txt: `en ${Math.ceil(h / 24)} días`, cls: ''};
+}
+function renderEntregas() {
+  const el = $('#lista-entregas');
+  const lista = [...S.entregas].sort((a, b) => (a.hecha - b.hecha) || (a.fecha - b.fecha));
+  if (!lista.length) { el.innerHTML = '<p class="hint">Sin entregas registradas.</p>'; return; }
+  el.innerHTML = lista.map(e => {
+    const s = estado(e);
+    const f = new Date(e.fecha).toLocaleString('es-CO', {weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'});
+    return `
+      <div class="row ${e.hecha ? 'done' : ''}">
+        <input type="checkbox" ${e.hecha ? 'checked' : ''} onchange="toggleEntrega('${e.id}')">
+        <div class="grow">
+          <div class="ttl">${esc(e.texto)}</div>
+          <div class="sub">${esc(nombreMateria(e.materia))} · ${f}</div>
+        </div>
+        <span class="badge ${s.cls}">${s.txt}</span>
+        <button class="ghost" onclick="borrarEntrega('${e.id}')" title="Borrar">✕</button>
+      </div>`;
+  }).join('');
+}
+
+/* ---------- Avisos ---------- */
+function renderBotonAvisos() {
+  const b = $('#btn-avisos');
+  const soporta = 'Notification' in window;
+  b.style.display = (soporta && Notification.permission === 'default') ? '' : 'none';
+}
+function pedirAvisos() {
+  if (!('Notification' in window)) { alert('Este navegador no soporta notificaciones.'); return; }
+  Notification.requestPermission().then(() => renderTodo());
+}
+function revisarAvisos() {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  let cambio = false;
+  S.entregas.forEach(e => {
+    const d = e.fecha - Date.now();
+    if (!e.hecha && !e.avisada && d > 0 && d <= 24 * 3600000) {
+      new Notification('Entrega en menos de 24 h', {body: `${e.texto} · ${nombreMateria(e.materia)}`});
+      e.avisada = true;
+      cambio = true;
+    }
+  });
+  if (cambio) { guardar(); renderEntregas(); }
+}
+
+/* ---------- Drive ---------- */
+function agregarDrive() {
+  const nombre = $('#drive-nombre').value.trim();
+  const url = $('#drive-url').value.trim();
+  if (!nombre || !url) { alert('Escribe un nombre y un enlace.'); return; }
+  S.drive.push({id: uid(), nombre, url});
+  $('#drive-nombre').value = '';
+  $('#drive-url').value = '';
+  guardar(); renderTodo();
+}
+function quitarDrive(id) {
+  S.drive = S.drive.filter(x => x.id !== id);
+  guardar(); renderTodo();
+}
+function renderDrive() {
+  $('#lista-drive').innerHTML = S.drive.map(l => `
+    <div class="row">
+      <span class="grow ttl">${esc(l.nombre)}</span>
+      <button onclick="abrirDrive('${l.id}')">Abrir</button>
+      <button class="ghost" onclick="quitarDrive('${l.id}')" title="Quitar">✕</button>
+    </div>`).join('');
+}
+
+/* ---------- Render general ---------- */
+function renderTodo() {
+  renderSelectMaterias();
+  renderMaterias();
+  renderEntregas();
+  renderLinks('clase', 'lista-clase');
+  renderLinks('moodle', 'lista-moodle');
+  renderLinks('classroom', 'lista-classroom');
+  renderDrive();
+  renderBotonAvisos();
+}
+
+$('#fecha').textContent = new Date().toLocaleDateString('es-CO', {weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'});
+renderTodo();
+revisarAvisos();
+setInterval(revisarAvisos, 60000);
+</script>
+</body>
+</html>

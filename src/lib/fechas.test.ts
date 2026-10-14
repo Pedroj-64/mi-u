@@ -1,5 +1,12 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { aIsoBogota, diaEnBogota, esIsoBogota } from './fechas.ts';
+import {
+  aIsoBogota,
+  desdeCampoFecha,
+  diaEnBogota,
+  esIsoBogota,
+  formatoEncabezado,
+  formatoFechaEntrega,
+} from './fechas.ts';
 
 describe('diaEnBogota', () => {
   afterEach(() => {
@@ -39,5 +46,27 @@ describe('esIsoBogota', () => {
     null,
   ])('rechaza %j', (valor) => {
     expect(esIsoBogota(valor)).toBe(false);
+  });
+});
+
+describe('desdeCampoFecha', () => {
+  it('toma el valor del campo datetime-local como hora de Bogotá', () => {
+    expect(desdeCampoFecha('2026-10-20T20:00')).toBe('2026-10-20T20:00:00-05:00');
+    expect(desdeCampoFecha('2026-10-20T20:00:30')).toBe('2026-10-20T20:00:30-05:00');
+  });
+
+  it.each(['', '2026-02-30T10:00', '2026-10-20', 'mañana'])('devuelve null para %j', (valor) => {
+    expect(desdeCampoFecha(valor)).toBeNull();
+  });
+});
+
+describe('formatos para mostrar', () => {
+  // En Tokio ya es el 15 a las 10:00 a. m.; lo que se muestra es la hora de Bogotá.
+  it('la fecha de una entrega sale en es-CO y hora de Bogotá', () => {
+    expect(formatoFechaEntrega('2026-10-14T20:00:00-05:00')).toMatch(/^mié, 14 de oct, 08:00\sp\.\sm\.$/);
+  });
+
+  it('el encabezado muestra el día de hoy en Bogotá', () => {
+    expect(formatoEncabezado(Date.parse('2026-10-14T20:00:00-05:00'))).toBe('miércoles, 14 de octubre de 2026');
   });
 });

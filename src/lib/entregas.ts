@@ -21,6 +21,27 @@ export function estadoEntrega(entrega: Entrega, ahora: number): EstadoEntrega {
   return { tipo: 'dias', dias };
 }
 
+/** Texto de la etiqueta de estado en la lista. */
+export function etiquetaEstado(estado: EstadoEntrega): string {
+  switch (estado.tipo) {
+    case 'entregada':
+      return 'Entregada';
+    case 'vencida':
+      return 'Vencida';
+    case 'hoy':
+      return 'Para hoy';
+    case 'manana':
+      return 'Mañana';
+    case 'dias':
+      return `en ${estado.dias} días`;
+  }
+}
+
+/** Pendientes primero y entregadas al final; dentro de cada grupo, por fecha, como en mi-u.html. */
+export function ordenarEntregas(entregas: Entrega[]): Entrega[] {
+  return [...entregas].sort((a, b) => Number(a.hecha) - Number(b.hecha) || Date.parse(a.fecha) - Date.parse(b.fecha));
+}
+
 /** true si toca el aviso del navegador: sin hacer, sin avisar y con 0 < tiempo restante ≤ 24 h, como en mi-u.html. */
 export function debeAvisar(entrega: Entrega, ahora: number): boolean {
   const restante = Date.parse(entrega.fecha) - ahora;

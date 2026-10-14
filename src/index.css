@@ -11,6 +11,13 @@
   --color-borde: #e3e6ee;
   --color-acento: #4f46e5;
   --color-acento-suave: rgba(79, 70, 229, 0.12);
+  /* Etiquetas de estado: iguales en modo claro y oscuro, como en mi-u.html. */
+  --color-exito: #16a34a;
+  --color-exito-suave: rgba(22, 163, 74, 0.15);
+  --color-peligro: #dc2626;
+  --color-peligro-suave: rgba(220, 38, 38, 0.15);
+  --color-alerta: #d97706;
+  --color-alerta-suave: rgba(217, 119, 6, 0.15);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -35,5 +42,11 @@
     min-height: 100vh;
     background-color: var(--color-fondo);
     color: var(--color-texto);
+  }
+
+  /* El texto de ejemplo de los campos usa el color por defecto del navegador, como en mi-u.html. */
+  ::placeholder {
+    color: revert;
+    opacity: revert;
   }
 }

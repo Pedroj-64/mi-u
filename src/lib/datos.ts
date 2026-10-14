@@ -1,0 +1,53 @@
+// Cambios sobre los datos de la app. Cada función devuelve datos nuevos sin modificar los recibidos.
+import type { Datos, Entrega, Materia } from './tipos.ts';
+
+export type CampoEnlace = 'clase' | 'moodle' | 'classroom';
+
+export function nuevoId(): string {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+}
+
+export function nombreMateria(materias: Materia[], id: string): string {
+  return materias.find((m) => m.id === id)?.nombre ?? 'Materia eliminada';
+}
+
+export function agregarMateria(datos: Datos, nombre: string): Datos {
+  return { ...datos, materias: [...datos.materias, { id: nuevoId(), nombre, clase: '', moodle: '', classroom: '' }] };
+}
+
+/** Quita la materia (con sus enlaces) y también sus entregas. */
+export function quitarMateria(datos: Datos, id: string): Datos {
+  return {
+    ...datos,
+    materias: datos.materias.filter((m) => m.id !== id),
+    entregas: datos.entregas.filter((e) => e.materia !== id),
+  };
+}
+
+export function guardarEnlace(datos: Datos, id: string, campo: CampoEnlace, url: string): Datos {
+  return { ...datos, materias: datos.materias.map((m) => (m.id === id ? { ...m, [campo]: url } : m)) };
+}
+
+export function agregarEntrega(datos: Datos, nueva: Pick<Entrega, 'materia' | 'texto' | 'fecha'>): Datos {
+  return { ...datos, entregas: [...datos.entregas, { id: nuevoId(), ...nueva, hecha: false, avisada: false }] };
+}
+
+export function alternarEntrega(datos: Datos, id: string): Datos {
+  return { ...datos, entregas: datos.entregas.map((e) => (e.id === id ? { ...e, hecha: !e.hecha } : e)) };
+}
+
+export function borrarEntrega(datos: Datos, id: string): Datos {
+  return { ...datos, entregas: datos.entregas.filter((e) => e.id !== id) };
+}
+
+export function marcarAvisadas(datos: Datos, ids: string[]): Datos {
+  return { ...datos, entregas: datos.entregas.map((e) => (ids.includes(e.id) ? { ...e, avisada: true } : e)) };
+}
+
+export function agregarDrive(datos: Datos, nombre: string, url: string): Datos {
+  return { ...datos, drive: [...datos.drive, { id: nuevoId(), nombre, url }] };
+}
+
+export function quitarDrive(datos: Datos, id: string): Datos {
+  return { ...datos, drive: datos.drive.filter((l) => l.id !== id) };
+}

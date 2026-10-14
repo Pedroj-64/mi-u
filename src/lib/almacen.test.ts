@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { storageFalso } from '../test/storage-falso.ts';
 import { abrirAlmacen, CLAVE, CLAVE_CORRUPTO, type AlmacenWeb } from './almacen.ts';
 import type { Datos } from './tipos.ts';
 
@@ -17,18 +18,6 @@ const datosNuevos: Datos = {
   entregas: [{ id: 'e1', materia: 'm1', texto: 'Taller 3', fecha: '2026-10-20T20:00:00-05:00', hecha: false, avisada: false }],
   drive: [{ id: 'd1', nombre: 'Carpeta de PETI', url: 'https://drive.google.com/drive/folders/abc' }],
 };
-
-/** localStorage en memoria; `valores` deja revisar qué quedó guardado. */
-function storageFalso(inicial: Record<string, string> = {}) {
-  const valores = new Map(Object.entries(inicial));
-  return {
-    valores,
-    getItem: (clave: string) => valores.get(clave) ?? null,
-    setItem: (clave: string, valor: string) => {
-      valores.set(clave, valor);
-    },
-  };
-}
 
 const lanza = (nombre: string) => (): never => {
   throw new DOMException('Simulado en la prueba', nombre);

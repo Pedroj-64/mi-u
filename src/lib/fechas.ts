@@ -33,3 +33,38 @@ export function diasEntre(desde: number, hasta: number): number {
 function numeroDeDia(instante: number): number {
   return Math.floor((instante + DESFASE_MS) / DIA_MS);
 }
+
+/** Valor de un campo datetime-local ("2026-10-20T20:00") → fecha en el formato que se guarda, o null si no es válido. */
+export function desdeCampoFecha(valor: string): string | null {
+  const iso = `${valor.length === 16 ? `${valor}:00` : valor}${DESFASE}`;
+  return esIsoBogota(iso) ? iso : null;
+}
+
+// Para mostrar fechas se usa Intl con la zona de Bogotá, equivalente al desfase fijo,
+// y las mismas opciones de formato que mi-u.html.
+const formatoEntrega = new Intl.DateTimeFormat('es-CO', {
+  timeZone: 'America/Bogota',
+  weekday: 'short',
+  day: 'numeric',
+  month: 'short',
+  hour: '2-digit',
+  minute: '2-digit',
+});
+
+const formatoLargo = new Intl.DateTimeFormat('es-CO', {
+  timeZone: 'America/Bogota',
+  weekday: 'long',
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+});
+
+/** Fecha de una entrega para la lista: "mar, 20 de oct, 08:00 p. m.". */
+export function formatoFechaEntrega(fecha: string): string {
+  return formatoEntrega.format(Date.parse(fecha));
+}
+
+/** Fecha del encabezado: "miércoles, 14 de octubre de 2026". */
+export function formatoEncabezado(instante: number): string {
+  return formatoLargo.format(instante);
+}

@@ -1,3 +1,4 @@
+import { nuevoId } from './datos.ts';
 import { aIsoBogota, esIsoBogota } from './fechas.ts';
 import type { Datos, DriveLink, Entrega, Materia } from './tipos.ts';
 
@@ -83,10 +84,6 @@ function estadoInicial(): Datos {
     entregas: [],
     drive: [],
   };
-}
-
-function nuevoId(): string {
-  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 }
 
 /** Copia el contenido dañado sin pisar copias anteriores; devuelve la clave usada, o null si no pudo. */

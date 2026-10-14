@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { debeAvisar, estadoEntrega } from './entregas.ts';
+import { debeAvisar, estadoEntrega, etiquetaEstado, ordenarEntregas, type EstadoEntrega } from './entregas.ts';
 import type { Entrega } from './tipos.ts';
 
 // Miércoles 14 de octubre de 2026, 9:00 a. m. en Bogotá. En Tokio, la zona en la
@@ -66,5 +66,35 @@ describe('debeAvisar', () => {
     expect(debeAvisar(entrega('2026-10-14T20:00:00-05:00', { avisada: true }), ahora)).toBe(false);
     expect(debeAvisar(entrega('2026-10-14T20:00:00-05:00', { hecha: true }), ahora)).toBe(false);
     expect(debeAvisar(entrega('2026-10-14T08:00:00-05:00'), ahora)).toBe(false);
+  });
+});
+
+describe('etiquetaEstado', () => {
+  it.each([
+    [{ tipo: 'entregada' }, 'Entregada'],
+    [{ tipo: 'vencida' }, 'Vencida'],
+    [{ tipo: 'hoy' }, 'Para hoy'],
+    [{ tipo: 'manana' }, 'Mañana'],
+    [{ tipo: 'dias', dias: 6 }, 'en 6 días'],
+  ] satisfies [EstadoEntrega, string][])('%j → %s', (estado, texto) => {
+    expect(etiquetaEstado(estado)).toBe(texto);
+  });
+});
+
+describe('ordenarEntregas', () => {
+  it('pone las pendientes primero y las entregadas al final, cada grupo por fecha', () => {
+    const lista = [
+      entrega('2026-10-20T08:00:00-05:00', { id: 'hecha-tarde', hecha: true }),
+      entrega('2026-10-18T08:00:00-05:00', { id: 'pendiente-tarde' }),
+      entrega('2026-10-10T08:00:00-05:00', { id: 'hecha-temprano', hecha: true }),
+      entrega('2026-10-13T08:00:00-05:00', { id: 'pendiente-vencida' }),
+    ];
+    expect(ordenarEntregas(lista).map((e) => e.id)).toEqual([
+      'pendiente-vencida',
+      'pendiente-tarde',
+      'hecha-temprano',
+      'hecha-tarde',
+    ]);
+    expect(lista[0].id).toBe('hecha-tarde');
   });
 });

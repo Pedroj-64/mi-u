@@ -14,6 +14,7 @@ Panel personal para organizar la vida universitaria en un solo lugar: entregas, 
 - **Classroom:** acceso a Google Classroom y enlace por materia.
 - **Drive:** acceso rápido a Google Drive y a carpetas o enlaces que uses seguido.
 - **Materias:** agrega o quita materias; aparecen en todas las secciones.
+- **Respaldo:** exporta todos tus datos a un archivo JSON e impórtalo en otro navegador o equipo.
 
 Los datos se guardan en el `localStorage` del navegador. No hay servidor ni cuentas.
 
@@ -40,7 +41,7 @@ Para usarla, abre `mi-u.html` en cualquier navegador moderno.
 - [ ] Vista semanal de entregas
 - [ ] Filtros y búsqueda
 - [ ] Ordenar materias arrastrándolas
-- [ ] Exportar e importar datos en JSON
+- [x] Exportar e importar datos en JSON
 - [ ] Deshacer al borrar
 - [ ] Pruebas unitarias para la lógica de fechas y estados
 - [ ] Atajos de teclado

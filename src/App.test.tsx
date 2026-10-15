@@ -341,3 +341,28 @@ describe('Avisos del almacén', () => {
     expect(within(seccion('Mis materias')).getByText('Cálculo Integral')).toBeInTheDocument();
   });
 });
+
+describe('Respaldo', () => {
+  const respaldo = (datos: unknown) => new File([JSON.stringify(datos)], 'respaldo.json', { type: 'application/json' });
+
+  it('importa un respaldo válido después de confirmar y lo guarda', async () => {
+    const { usuario, guardado } = montar();
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    const nuevos: Datos = { materias: [materia('m1', 'Física')], entregas: [], drive: [] };
+
+    await usuario.upload(within(seccion('Respaldo')).getByLabelText('Archivo de respaldo'), respaldo(nuevos));
+
+    expect(await within(seccion('Mis materias')).findByText('Física')).toBeInTheDocument();
+    expect(guardado()).toEqual(nuevos);
+  });
+
+  it('rechaza un archivo inválido sin tocar los datos', async () => {
+    const { usuario } = montar();
+    const alerta = vi.spyOn(window, 'alert').mockImplementation(() => {});
+
+    await usuario.upload(within(seccion('Respaldo')).getByLabelText('Archivo de respaldo'), respaldo({ x: 1 }));
+
+    await vi.waitFor(() => expect(alerta).toHaveBeenCalledWith(expect.stringContaining('no es un respaldo válido')));
+    expect(within(seccion('Mis materias')).getByText('Estructura de Datos')).toBeInTheDocument();
+  });
+});

@@ -6,6 +6,7 @@ import Drive from './components/Drive.tsx';
 import Encabezado from './components/Encabezado.tsx';
 import Entregas from './components/Entregas.tsx';
 import Materias from './components/Materias.tsx';
+import Respaldo from './components/Respaldo.tsx';
 import { useAhora } from './hooks/useAhora.ts';
 import { useAvisos } from './hooks/useAvisos.ts';
 import {
@@ -68,6 +69,7 @@ export default function App({ store }: { store: Store }) {
           onAgregar={(nombre) => store.actualizar((d) => agregarMateria(d, nombre))}
           onQuitar={(id) => store.actualizar((d) => quitarMateria(d, id))}
         />
+        <Respaldo datos={datos} onImportar={(nuevos) => store.actualizar(() => nuevos)} />
       </main>
     </>
   );

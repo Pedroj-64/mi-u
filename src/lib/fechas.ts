@@ -64,10 +64,39 @@ export function formatoFechaEntrega(fecha: string): string {
   return formatoEntrega.format(Date.parse(fecha));
 }
 
+const conMayuscula = (texto: string) => texto.charAt(0).toLocaleUpperCase('es-CO') + texto.slice(1);
+
 /** Fecha del encabezado, con mayúscula inicial: "Miércoles, 14 de octubre de 2026". */
 export function formatoEncabezado(instante: number): string {
-  const texto = formatoLargo.format(instante);
-  return texto.charAt(0).toLocaleUpperCase('es-CO') + texto.slice(1);
+  return conMayuscula(formatoLargo.format(instante));
+}
+
+// Los días de la vista semanal son claves "AAAA-MM-DD": se formatean en UTC, que es donde Date.parse las ubica.
+const formatoDiaCorto = new Intl.DateTimeFormat('es-CO', { timeZone: 'UTC', weekday: 'short', day: 'numeric' });
+const formatoMes = new Intl.DateTimeFormat('es-CO', { timeZone: 'UTC', month: 'long' });
+const formatoHoraBogota = new Intl.DateTimeFormat('es-CO', { timeZone: 'America/Bogota', hour: '2-digit', minute: '2-digit' });
+
+/** Encabezado de un día de la vista semanal: "2026-10-14" → "Mié 14". */
+export function formatoDiaSemana(dia: string): string {
+  return conMayuscula(formatoDiaCorto.format(Date.parse(dia)));
+}
+
+/** Título de la semana que empieza en `lunes`; el mes y el año solo se repiten si cambian. */
+export function formatoSemana(lunes: string): string {
+  const domingo = new Date(Date.parse(lunes) + 6 * DIA_MS).toISOString().slice(0, 10);
+  const [anioInicio, , diaInicio] = lunes.split('-');
+  const [anioFin, , diaFin] = domingo.split('-');
+  const mesInicio = formatoMes.format(Date.parse(lunes));
+  const mesFin = formatoMes.format(Date.parse(domingo));
+  const fin = `${Number(diaFin)} de ${mesFin} de ${anioFin}`;
+  if (anioInicio !== anioFin) return `Semana del ${Number(diaInicio)} de ${mesInicio} de ${anioInicio} al ${fin}`;
+  if (mesInicio !== mesFin) return `Semana del ${Number(diaInicio)} de ${mesInicio} al ${fin}`;
+  return `Semana del ${Number(diaInicio)} al ${fin}`;
+}
+
+/** Hora de una entrega en Bogotá: "11:59 p. m.". */
+export function formatoHora(fecha: string): string {
+  return formatoHoraBogota.format(Date.parse(fecha));
 }
 
 /** Saludo según la hora de Bogotá: días de 5:00 a 11:59, tardes de 12:00 a 18:59 y noches el resto. */

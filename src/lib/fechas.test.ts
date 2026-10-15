@@ -5,7 +5,10 @@ import {
   diaEnBogota,
   esIsoBogota,
   formatoEncabezado,
+  formatoDiaSemana,
   formatoFechaEntrega,
+  formatoHora,
+  formatoSemana,
   saludo,
 } from './fechas.ts';
 
@@ -83,5 +86,22 @@ describe('saludo', () => {
     ['19:00', 'Buenas noches'],
   ])('a las %s en Bogotá dice "%s"', (hora, esperado) => {
     expect(saludo(Date.parse(`2026-10-14T${hora}:00-05:00`))).toBe(esperado);
+  });
+});
+
+describe('formatos de la vista semanal', () => {
+  it('el título de la semana repite el mes y el año solo si cambian', () => {
+    expect(formatoSemana('2026-10-12')).toBe('Semana del 12 al 18 de octubre de 2026');
+    expect(formatoSemana('2026-10-26')).toBe('Semana del 26 de octubre al 1 de noviembre de 2026');
+    expect(formatoSemana('2026-12-28')).toBe('Semana del 28 de diciembre de 2026 al 3 de enero de 2027');
+  });
+
+  it('cada día muestra su nombre corto y su número', () => {
+    expect(formatoDiaSemana('2026-10-14')).toBe('Mié 14');
+    expect(formatoDiaSemana('2026-10-18')).toBe('Dom 18');
+  });
+
+  it('la hora de una entrega sale en hora de Bogotá', () => {
+    expect(formatoHora('2026-10-14T23:59:00-05:00')).toMatch(/^11:59\sp\.\sm\.$/);
   });
 });

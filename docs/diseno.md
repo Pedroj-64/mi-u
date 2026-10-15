@@ -73,6 +73,7 @@ Una prueba de `npm test` lee este documento y los tokens reales de `src/index.cs
 | Texto secundario y contador en cero | `tenue` | `superficie` | 4,5 | 5,52 | 6,90 |
 | Acento: iconos y texto | `acento` | `tarjeta` | 4,5 | 6,29 | 8,72 |
 | Botón secundario e icono de estado vacío | `acento` | `acento-suave` | 4,5 | 5,55 | 6,69 |
+| Texto secundario en el día de hoy (vista semanal) | `tenue` | `acento-suave` | 4,5 | 5,40 | 5,80 |
 | Botón principal | `sobre-acento` | `acento` | 4,5 | 6,29 | 8,45 |
 | Botón principal al pasar el puntero | `sobre-acento` | `acento-hover` | 4,5 | 7,90 | 11,13 |
 | Entregada | `entregada` | `entregada-fondo` | 4,5 | 6,28 | 9,31 |
@@ -272,6 +273,8 @@ Son de Lucide (`lucide-react` 1.57) con trazo de 2 px:
 | Aviso del almacén | `TriangleAlert` |
 | Estados vacíos | `ClipboardCheck` (Entregas), `BookPlus` (Mis materias y secciones de enlaces), `FolderPlus` (Drive) |
 | Botón "Ir a Mis materias" | `ArrowDown` (los demás botones de estado vacío usan `Plus`) |
+| Semana anterior, Esta semana y Semana siguiente | `ChevronLeft`, `CalendarCheck` y `ChevronRight` |
+| Buscar entregas (dentro del campo), sin resultados y filtro vacío | `Search`, `SearchX` (botón `X`) y `ListFilter` |
 
 ## Movimiento
 
@@ -356,6 +359,28 @@ Van dentro de la tarjeta, en un recuadro con fondo `fondo` y radio de 12 px:
 | Mis materias sin materias | Todavía no tienes materias | Agrégalas para organizar tus entregas y enlaces. | "Agregar materia": lleva el foco a "Nueva materia" |
 | Clases virtuales, Moodle y Classroom sin materias | Primero agrega tus materias | Aquí aparecerá una fila por materia para guardar su enlace. | "Ir a Mis materias": lleva el foco a "Nueva materia" |
 | Drive sin enlaces | Guarda aquí tus carpetas | Los enlaces que más usas quedan a un clic. | "Agregar enlace": lleva el foco a "Nombre" |
+
+### Vista semanal
+
+Es un bloque dentro de la tarjeta de Entregas, entre el formulario y la lista.
+- **Semana.** Va de lunes a domingo, en días de calendario de Bogotá.
+- **Título.** "Semana del 12 al 18 de octubre de 2026"; el mes y el año solo se repiten si cambian dentro de la semana.
+- **Navegación.** Botones secundarios "Semana anterior", "Esta semana" y "Semana siguiente". En móvil, anterior y siguiente muestran solo la flecha, pero conservan su nombre accesible. "Esta semana" se deshabilita cuando ya se está en ella.
+- **Días.** Siete columnas desde 1024 px; por debajo, cada día va apilado. Cada día tiene fondo `fondo` y muestra todas sus entregas, también las hechas: título, punto y nombre de la materia, etiqueta de estado y hora.
+- **Hoy.** Fondo `acento-suave`, borde de 2 px en `acento`, la píldora "Hoy" y `aria-current="date"`, así que no depende solo del color.
+- **Independencia.** Ni el filtro ni la búsqueda la afectan, y lo dice una línea de 12 px en `tenue` bajo el título: "Muestra todas las entregas de la semana: el filtro y la búsqueda solo cambian la lista de abajo."
+
+### Filtro y búsqueda
+
+Van entre la vista semanal y la lista.
+- **Filtro.** Grupo de botones "Todas", "Pendientes", "Vencidas" y "Entregadas", con `aria-pressed` y la etiqueta visible "Filtrar por estado". Cada botón muestra cuántas entregas mostraría con la búsqueda actual.
+  - Activo: fondo `acento` y texto `sobre-acento`.
+  - Inactivo: fondo `tarjeta`, borde `borde-control` y el número en `tenue`.
+- **Pendientes.** Son las que no están hechas ni vencidas (para hoy, mañana o en N días), así que los tres filtros reparten "Todas" sin solaparse.
+- **Búsqueda.** Campo "Buscar entregas". Busca en la descripción y en el nombre de la materia, sin distinguir mayúsculas ni tildes; la "ñ" también cuenta como "n".
+- **Sin resultados.** Estado vacío "Ninguna entrega coincide con la búsqueda", con "Limpiar búsqueda", que la borra y devuelve el foco al campo.
+- **Filtro vacío.** Si el filtro no tiene entregas y no hay búsqueda, se muestra un estado vacío con "Ver todas".
+- **Sin memoria.** Filtro y búsqueda viven en el estado de la pantalla y no se guardan al recargar.
 
 ### Aviso del almacén
 

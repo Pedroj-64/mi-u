@@ -1,33 +1,23 @@
-import {
-  BellRing,
-  CalendarDays,
-  CircleAlert,
-  CircleCheck,
-  ClipboardCheck,
-  ClipboardList,
-  Clock,
-  Plus,
-  Sunrise,
-  Trash,
-  type LucideIcon,
-} from 'lucide-react';
+import { BellRing, ClipboardCheck, ClipboardList, ListFilter, Plus, SearchX, Trash, X } from 'lucide-react';
 import { useState } from 'react';
-import { estadoEntrega, etiquetaEstado, ordenarEntregas, type EstadoEntrega } from '../lib/entregas.ts';
+import { estadoEntrega, ordenarEntregas } from '../lib/entregas.ts';
 import { desdeCampoFecha, formatoFechaEntrega } from '../lib/fechas.ts';
+import { contarPorFiltro, filtrarEntregas, type FiltroEntregas } from '../lib/filtros.ts';
 import type { Entrega, Materia } from '../lib/tipos.ts';
 import Campo from './Campo.tsx';
 import EstadoVacio from './EstadoVacio.tsx';
+import EtiquetaEstado from './EtiquetaEstado.tsx';
 import { botonIcono, botonPrincipal, botonSecundario, campo, fila, tituloElemento } from './estilos.ts';
+import FiltrosEntregas from './FiltrosEntregas.tsx';
 import PuntoMateria from './PuntoMateria.tsx';
 import Tarjeta from './Tarjeta.tsx';
+import VistaSemanal from './VistaSemanal.tsx';
 
-// Cada estado lleva icono y texto, nunca solo color (docs/diseno.md, "Estados de las entregas").
-const ESTILO_ESTADO: Record<EstadoEntrega['tipo'], { icono: LucideIcon; clases: string }> = {
-  entregada: { icono: CircleCheck, clases: 'bg-entregada-fondo text-entregada' },
-  vencida: { icono: CircleAlert, clases: 'bg-vencida-fondo text-vencida' },
-  hoy: { icono: Clock, clases: 'bg-hoy-fondo text-hoy' },
-  manana: { icono: Sunrise, clases: 'bg-manana-fondo text-manana' },
-  dias: { icono: CalendarDays, clases: 'bg-dias-fondo text-dias' },
+const SIN_ENTREGAS: Record<FiltroEntregas, string> = {
+  todas: 'No hay entregas',
+  pendientes: 'No hay entregas pendientes',
+  vencidas: 'No hay entregas vencidas',
+  entregadas: 'No hay entregas entregadas',
 };
 
 interface Props {
@@ -51,6 +41,9 @@ export default function Entregas(props: Props) {
   // Si la materia elegida ya no existe (o aún no se eligió), queda la primera, como en un <select> normal.
   const materiaElegida = materias.some((m) => m.id === materia) ? materia : (materias[0]?.id ?? '');
   const porId = new Map(materias.map((m) => [m.id, m]));
+  // El filtro y la búsqueda solo viven en pantalla: no se guardan al recargar.
+  const [filtro, setFiltro] = useState<FiltroEntregas>('todas');
+  const [busqueda, setBusqueda] = useState('');
 
   const agregar = () => {
     const descripcion = texto.trim();
@@ -64,7 +57,7 @@ export default function Entregas(props: Props) {
     setFecha('');
   };
 
-  const lista = ordenarEntregas(entregas);
+  const visibles = ordenarEntregas(filtrarEntregas(entregas, materias, { filtro, busqueda }, ahora));
 
   return (
     <Tarjeta
@@ -114,7 +107,10 @@ export default function Entregas(props: Props) {
         </button>
       </div>
       <div className="mt-4">
-        {lista.length === 0 ? (
+        <VistaSemanal entregas={entregas} materias={materias} ahora={ahora} />
+      </div>
+      <div className="mt-4">
+        {entregas.length === 0 ? (
           <EstadoVacio
             icono={ClipboardCheck}
             titulo="Todavía no tienes entregas"
@@ -123,18 +119,51 @@ export default function Entregas(props: Props) {
             enfocar="entrega-descripcion"
           />
         ) : (
-          <ul>
-            {lista.map((e) => (
-              <FilaEntrega
-                key={e.id}
-                entrega={e}
-                materia={porId.get(e.materia)}
-                ahora={ahora}
-                onAlternar={onAlternar}
-                onBorrar={onBorrar}
-              />
-            ))}
-          </ul>
+          <>
+            <FiltrosEntregas
+              filtro={filtro}
+              conteos={contarPorFiltro(entregas, materias, busqueda, ahora)}
+              busqueda={busqueda}
+              onFiltro={setFiltro}
+              onBusqueda={setBusqueda}
+            />
+            <div className="mt-3">
+              {visibles.length > 0 ? (
+                <ul aria-label="Lista de entregas">
+                  {visibles.map((e) => (
+                    <FilaEntrega
+                      key={e.id}
+                      entrega={e}
+                      materia={porId.get(e.materia)}
+                      ahora={ahora}
+                      onAlternar={onAlternar}
+                      onBorrar={onBorrar}
+                    />
+                  ))}
+                </ul>
+              ) : busqueda.trim() !== '' ? (
+                <EstadoVacio
+                  icono={SearchX}
+                  titulo="Ninguna entrega coincide con la búsqueda"
+                  texto="Prueba con otra palabra, o revisa el filtro activo."
+                  accion="Limpiar búsqueda"
+                  iconoAccion={X}
+                  onAccion={() => setBusqueda('')}
+                  enfocar="buscar-entregas"
+                />
+              ) : (
+                <EstadoVacio
+                  icono={ListFilter}
+                  titulo={SIN_ENTREGAS[filtro]}
+                  texto="Las demás siguen en «Todas»."
+                  accion="Ver todas"
+                  iconoAccion={ListFilter}
+                  onAccion={() => setFiltro('todas')}
+                  enfocar="filtro-todas"
+                />
+              )}
+            </div>
+          </>
         )}
       </div>
     </Tarjeta>
@@ -151,8 +180,6 @@ interface PropsFila {
 
 /** En móvil la etiqueta de estado baja a la segunda fila; desde md va a la derecha. */
 function FilaEntrega({ entrega: e, materia, ahora, onAlternar, onBorrar }: PropsFila) {
-  const estado = estadoEntrega(e, ahora);
-  const { icono: Icono, clases } = ESTILO_ESTADO[estado.tipo];
   return (
     <li
       className={`${fila} grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5 md:grid-cols-[auto_minmax(0,1fr)_auto_auto]`}
@@ -173,17 +200,12 @@ function FilaEntrega({ entrega: e, materia, ahora, onAlternar, onBorrar }: Props
           <span className="min-w-0 break-words">
             {materia && <PuntoMateria color={materia.color} className="mr-1.5 align-middle" />}
             {materia?.nombre ?? 'Materia eliminada'}
-            <span aria-hidden="true">{' · '}</span>
+            <span aria-hidden="true">{'\u00a0· '}</span>
           </span>
           <span className="whitespace-nowrap">{formatoFechaEntrega(e.fecha)}</span>
         </p>
       </div>
-      <span
-        className={`col-start-2 row-start-2 inline-flex h-6 items-center gap-1.5 justify-self-start rounded-full px-2.5 text-[12px] leading-4 font-semibold whitespace-nowrap transition-colors duration-200 ease-estandar md:col-start-3 md:row-start-1 ${clases}`}
-      >
-        <Icono size={14} aria-hidden="true" />
-        {etiquetaEstado(estado)}
-      </span>
+      <EtiquetaEstado estado={estadoEntrega(e, ahora)} className="col-start-2 row-start-2 justify-self-start md:col-start-3 md:row-start-1" />
       <button
         type="button"
         className={`${botonIcono} col-start-3 row-span-2 row-start-1 md:col-start-4 md:row-span-1`}

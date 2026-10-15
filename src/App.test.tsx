@@ -41,6 +41,11 @@ function montar(datos?: Datos, storage: AlmacenWeb = storageFalso()) {
 
 const seccion = (titulo: string) => screen.getByRole('region', { name: titulo });
 const filas = (region: HTMLElement) => within(region).queryAllByRole('listitem');
+/** Filas de la lista de entregas (sin las de la vista semanal); vacía si no hay lista. */
+const filasEntregas = () => {
+  const lista = screen.queryByRole('list', { name: 'Lista de entregas' });
+  return lista ? within(lista).getAllByRole('listitem') : [];
+};
 
 beforeEach(() => {
   vi.useFakeTimers({ now: AHORA, toFake: ['Date'] });
@@ -63,7 +68,7 @@ describe('Entregas', () => {
     fireEvent.change(within(entregas).getByLabelText('Fecha límite'), { target: { value: '2026-10-14T23:59' } });
     await usuario.click(within(entregas).getByRole('button', { name: 'Agregar' }));
 
-    const [fila] = filas(entregas);
+    const [fila] = filasEntregas();
     expect(fila).toHaveTextContent('Taller 3');
     expect(fila).toHaveTextContent('Ingeniería de Software · mié, 14 de oct, 11:59 p. m.');
     expect(fila).toHaveTextContent('Para hoy');
@@ -72,7 +77,7 @@ describe('Entregas', () => {
 
     await usuario.click(within(fila).getByRole('button', { name: 'Borrar Taller 3' }));
 
-    expect(filas(entregas)).toHaveLength(0);
+    expect(filasEntregas()).toHaveLength(0);
     expect(within(entregas).getByText('Todavía no tienes entregas')).toBeInTheDocument();
     expect(guardado().entregas).toEqual([]);
   });
@@ -85,7 +90,7 @@ describe('Entregas', () => {
     await usuario.click(within(seccion('Entregas')).getByRole('button', { name: 'Agregar' }));
 
     expect(alerta).toHaveBeenCalledWith('Completa materia, descripción y fecha.');
-    expect(filas(seccion('Entregas'))).toHaveLength(0);
+    expect(filasEntregas()).toHaveLength(0);
   });
 
   it('marcarla como hecha la deja "Entregada" y la pasa al final', async () => {
@@ -98,13 +103,13 @@ describe('Entregas', () => {
       drive: [],
     });
     const entregas = seccion('Entregas');
-    expect(filas(entregas)[0]).toHaveTextContent('Quiz');
-    expect(filas(entregas)[0]).toHaveTextContent('Mañana');
-    expect(filas(entregas)[1]).toHaveTextContent('en 3 días');
+    expect(filasEntregas()[0]).toHaveTextContent('Quiz');
+    expect(filasEntregas()[0]).toHaveTextContent('Mañana');
+    expect(filasEntregas()[1]).toHaveTextContent('en 3 días');
 
     await usuario.click(within(entregas).getByRole('checkbox', { name: 'Quiz' }));
 
-    const [primera, segunda] = filas(entregas);
+    const [primera, segunda] = filasEntregas();
     expect(primera).toHaveTextContent('Informe');
     expect(segunda).toHaveTextContent('Quiz');
     expect(segunda).toHaveTextContent('Entregada');
@@ -144,7 +149,7 @@ describe('Mis materias', () => {
 
     expect(confirmar).toHaveBeenCalledWith('¿Quitar "Ingeniería de Software"? También se borran sus links y entregas.');
     expect(screen.queryByText('Ingeniería de Software')).not.toBeInTheDocument();
-    expect(filas(seccion('Entregas')).map((f) => within(f).getByRole('checkbox').getAttribute('aria-label'))).toEqual([
+    expect(filasEntregas().map((f) => within(f).getByRole('checkbox').getAttribute('aria-label'))).toEqual([
       'Parcial',
     ]);
     expect(guardado()).toMatchObject({ materias: [{ id: 'm2' }], entregas: [{ id: 'e2' }] });
@@ -391,5 +396,123 @@ describe('Estados vacíos', () => {
       await usuario.click(within(seccion(titulo)).getByRole('button', { name: 'Ir a Mis materias' }));
       expect(screen.getByLabelText('Nueva materia')).toHaveFocus();
     }
+  });
+});
+
+// Una entrega por estado el miércoles 14 de octubre a las 9:00: vencida, para hoy, mañana, en N días y entregada.
+const cincoEstados = (): Datos => ({
+  materias: [materia('m1', 'Ingeniería de Software'), materia('m2', 'Programación Concurrente')],
+  entregas: [
+    entrega('e1', 'm1', 'Parcial 1', '2026-10-13T18:00:00-05:00'),
+    entrega('e2', 'm2', 'Taller de sockets', '2026-10-14T23:59:00-05:00'),
+    entrega('e3', 'm1', 'Diseño de la base de datos', '2026-10-15T07:00:00-05:00'),
+    entrega('e4', 'm2', 'Informe final', '2026-10-20T20:00:00-05:00'),
+    { ...entrega('e5', 'm1', 'Lectura', '2026-10-10T08:00:00-05:00'), hecha: true },
+  ],
+  drive: [],
+});
+const titulos = () => filasEntregas().map((f) => within(f).getByRole('checkbox').getAttribute('aria-label'));
+const grupoFiltros = () => screen.getByRole('group', { name: 'Filtrar por estado' });
+const botonesFiltro = () => within(grupoFiltros()).getAllByRole('button').map((b) => b.textContent);
+
+describe('Filtro y búsqueda', () => {
+  it('filtra por estado con un grupo de botones que indica cuál está activo', async () => {
+    const { usuario } = montar(cincoEstados());
+    const boton = (nombre: string) => within(grupoFiltros()).getByRole('button', { name: nombre });
+    expect(botonesFiltro()).toEqual(['Todas 5', 'Pendientes 3', 'Vencidas 1', 'Entregadas 1']);
+    expect(boton('Todas 5')).toHaveAttribute('aria-pressed', 'true');
+
+    await usuario.click(boton('Vencidas 1'));
+    expect(boton('Vencidas 1')).toHaveAttribute('aria-pressed', 'true');
+    expect(boton('Todas 5')).toHaveAttribute('aria-pressed', 'false');
+    expect(titulos()).toEqual(['Parcial 1']);
+
+    await usuario.click(boton('Pendientes 3'));
+    expect(titulos()).toEqual(['Taller de sockets', 'Diseño de la base de datos', 'Informe final']);
+
+    await usuario.click(boton('Entregadas 1'));
+    expect(titulos()).toEqual(['Lectura']);
+  });
+
+  it('busca por descripción o materia sin distinguir mayúsculas ni tildes, combinado con el filtro', async () => {
+    const { usuario } = montar(cincoEstados());
+    const buscar = screen.getByLabelText('Buscar entregas');
+
+    await usuario.type(buscar, 'INGENIERIA');
+    expect(titulos()).toEqual(['Parcial 1', 'Diseño de la base de datos', 'Lectura']);
+    expect(botonesFiltro()).toEqual(['Todas 3', 'Pendientes 1', 'Vencidas 1', 'Entregadas 1']);
+
+    await usuario.click(within(grupoFiltros()).getByRole('button', { name: 'Pendientes 1' }));
+    expect(titulos()).toEqual(['Diseño de la base de datos']);
+
+    await usuario.clear(buscar);
+    await usuario.type(buscar, 'diseno');
+    expect(titulos()).toEqual(['Diseño de la base de datos']);
+  });
+
+  it('sin resultados muestra el estado vacío y "Limpiar búsqueda" deja la lista como estaba', async () => {
+    const { usuario } = montar(cincoEstados());
+    const buscar = screen.getByLabelText('Buscar entregas');
+
+    await usuario.type(buscar, 'zzz');
+    expect(screen.getByText('Ninguna entrega coincide con la búsqueda')).toBeInTheDocument();
+    expect(filasEntregas()).toHaveLength(0);
+
+    await usuario.click(screen.getByRole('button', { name: 'Limpiar búsqueda' }));
+    expect(buscar).toHaveValue('');
+    expect(buscar).toHaveFocus();
+    expect(filasEntregas()).toHaveLength(5);
+  });
+
+  it('si un filtro queda vacío, "Ver todas" vuelve a mostrarlas', async () => {
+    const datos = cincoEstados();
+    const { usuario } = montar({ ...datos, entregas: datos.entregas.filter((e) => e.id !== 'e1') });
+
+    await usuario.click(within(grupoFiltros()).getByRole('button', { name: 'Vencidas 0' }));
+    expect(screen.getByText('No hay entregas vencidas')).toBeInTheDocument();
+
+    await usuario.click(screen.getByRole('button', { name: 'Ver todas' }));
+    expect(within(grupoFiltros()).getByRole('button', { name: 'Todas 4' })).toHaveAttribute('aria-pressed', 'true');
+    expect(within(grupoFiltros()).getByRole('button', { name: 'Todas 4' })).toHaveFocus();
+    expect(filasEntregas()).toHaveLength(4);
+  });
+});
+
+describe('Vista semanal', () => {
+  const semana = () => screen.getByRole('region', { name: /^Semana del/ });
+  const botonSemana = (nombre: string) => within(semana()).getByRole('button', { name: nombre });
+
+  it('muestra la semana de Bogotá con hoy resaltado, las entregas hechas y navega entre semanas', async () => {
+    const { usuario } = montar(cincoEstados());
+    expect(semana()).toHaveAccessibleName('Semana del 12 al 18 de octubre de 2026');
+    const hoy = semana().querySelector('[aria-current="date"]');
+    expect(hoy).toHaveTextContent('Mié 14');
+    expect(hoy).toHaveTextContent('Hoy');
+    expect(hoy).toHaveTextContent('Taller de sockets');
+    expect(hoy).toHaveTextContent('Programación Concurrente');
+    expect(hoy).toHaveTextContent('Para hoy');
+    expect(botonSemana('Esta semana')).toBeDisabled();
+
+    await usuario.click(botonSemana('Semana siguiente'));
+    expect(semana()).toHaveAccessibleName('Semana del 19 al 25 de octubre de 2026');
+    expect(semana()).toHaveTextContent('Informe final');
+    expect(semana().querySelector('[aria-current="date"]')).toBeNull();
+
+    await usuario.click(botonSemana('Esta semana'));
+    expect(semana()).toHaveAccessibleName('Semana del 12 al 18 de octubre de 2026');
+
+    await usuario.click(botonSemana('Semana anterior'));
+    expect(semana()).toHaveAccessibleName('Semana del 5 al 11 de octubre de 2026');
+    expect(semana()).toHaveTextContent('Lectura');
+    expect(semana()).toHaveTextContent('Entregada');
+  });
+
+  it('no la afectan el filtro ni la búsqueda de la lista, y lo dice', async () => {
+    const { usuario } = montar(cincoEstados());
+    expect(semana()).toHaveTextContent('el filtro y la búsqueda solo cambian la lista de abajo');
+    await usuario.click(within(grupoFiltros()).getByRole('button', { name: 'Entregadas 1' }));
+    await usuario.type(screen.getByLabelText('Buscar entregas'), 'zzz');
+    expect(semana()).toHaveTextContent('Taller de sockets');
+    expect(semana()).toHaveTextContent('Parcial 1');
   });
 });

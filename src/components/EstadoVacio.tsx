@@ -7,11 +7,13 @@ interface Props {
   texto: string;
   accion: string;
   iconoAccion?: LucideIcon;
+  /** Qué hace el botón antes de mover el foco (por ejemplo, limpiar la búsqueda). */
+  onAccion?: () => void;
   /** id del campo que recibe el foco al pulsar el botón. */
   enfocar: string;
 }
 
-export default function EstadoVacio({ icono: Icono, titulo, texto, accion, iconoAccion: IconoAccion = Plus, enfocar }: Props) {
+export default function EstadoVacio({ icono: Icono, titulo, texto, accion, iconoAccion: IconoAccion = Plus, onAccion, enfocar }: Props) {
   return (
     <div className="grid justify-items-center gap-1.5 rounded-xl bg-fondo px-6 py-8 text-center">
       <span className="mb-1.5 grid size-12 place-items-center rounded-full bg-acento-suave text-acento">
@@ -19,7 +21,14 @@ export default function EstadoVacio({ icono: Icono, titulo, texto, accion, icono
       </span>
       <p className="text-[15px] leading-5 font-semibold">{titulo}</p>
       <p className="text-[13px] leading-[18px] text-tenue">{texto}</p>
-      <button type="button" className={`${botonSecundario} mt-2`} onClick={() => document.getElementById(enfocar)?.focus()}>
+      <button
+        type="button"
+        className={`${botonSecundario} mt-2`}
+        onClick={() => {
+          onAccion?.();
+          document.getElementById(enfocar)?.focus();
+        }}
+      >
         <IconoAccion size={16} aria-hidden="true" />
         {accion}
       </button>

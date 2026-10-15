@@ -6,6 +6,7 @@ import {
   esIsoBogota,
   formatoEncabezado,
   formatoFechaEntrega,
+  saludo,
 } from './fechas.ts';
 
 describe('diaEnBogota', () => {
@@ -66,7 +67,21 @@ describe('formatos para mostrar', () => {
     expect(formatoFechaEntrega('2026-10-14T20:00:00-05:00')).toMatch(/^mié, 14 de oct, 08:00\sp\.\sm\.$/);
   });
 
-  it('el encabezado muestra el día de hoy en Bogotá', () => {
-    expect(formatoEncabezado(Date.parse('2026-10-14T20:00:00-05:00'))).toBe('miércoles, 14 de octubre de 2026');
+  it('el encabezado muestra el día de hoy en Bogotá, con mayúscula inicial', () => {
+    expect(formatoEncabezado(Date.parse('2026-10-14T20:00:00-05:00'))).toBe('Miércoles, 14 de octubre de 2026');
+  });
+});
+
+describe('saludo', () => {
+  // En Tokio (la zona de las pruebas) las 5:00 de Bogotá son las 19:00: el saludo debe salir de la hora de Bogotá.
+  it.each([
+    ['04:59', 'Buenas noches'],
+    ['05:00', 'Buenos días'],
+    ['11:59', 'Buenos días'],
+    ['12:00', 'Buenas tardes'],
+    ['18:59', 'Buenas tardes'],
+    ['19:00', 'Buenas noches'],
+  ])('a las %s en Bogotá dice "%s"', (hora, esperado) => {
+    expect(saludo(Date.parse(`2026-10-14T${hora}:00-05:00`))).toBe(esperado);
   });
 });

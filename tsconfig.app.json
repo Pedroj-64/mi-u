@@ -22,5 +22,7 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  /* Esta prueba lee archivos con node:fs; se revisa con tsconfig.node.json. */
+  "exclude": ["src/diseno.test.ts"]
 }

@@ -1,16 +1,17 @@
-// Clases de Tailwind que reproducen los estilos de mi-u.html.
-const botonBase = 'cursor-pointer rounded-lg text-[13px] whitespace-nowrap';
+// Clases de Tailwind compartidas, según docs/diseno.md.
+const transicion = 'transition-colors duration-150 ease-estandar';
+// `transition` (y no solo colores) porque el botón secundario también cambia su sombra interna.
+const botonBase =
+  'inline-flex h-10 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-[10px] px-4 text-[14px] leading-5 font-semibold whitespace-nowrap transition duration-150 ease-estandar disabled:cursor-not-allowed disabled:opacity-50';
 
-export const boton = `${botonBase} bg-acento px-3 py-2 text-white disabled:cursor-not-allowed disabled:opacity-35`;
-export const botonSuave = `${botonBase} bg-acento-suave px-3 py-2 text-acento`;
-export const botonQuitar = `${botonBase} px-2 py-1.5 text-tenue hover:text-texto`;
-export const campo = 'w-full rounded-lg border border-borde px-2.5 py-[9px] text-[13px] text-texto';
+/** Solo para crear: Agregar y Guardar. */
+export const botonPrincipal = `${botonBase} bg-acento text-sobre-acento enabled:hover:bg-acento-hover`;
+/** Abrir enlaces, accesos a Google, activar avisos y botones de los estados vacíos. */
+export const botonSecundario = `${botonBase} bg-acento-suave text-acento enabled:hover:shadow-[inset_0_0_0_1px_var(--color-acento)]`;
+/** Botón solo de icono (borrar y quitar); necesita aria-label. */
+export const botonIcono = `inline-flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-[10px] text-tenue ${transicion} hover:bg-superficie hover:text-texto`;
 
-const filaDeControles = 'flex flex-wrap gap-2 *:min-w-0 *:flex-[1_1_150px]';
-export const formulario = `my-3 ${filaDeControles}`;
-/** Sin margen superior, como el botón general de Classroom y de Drive. */
-export const formularioArriba = `mb-3 ${filaDeControles}`;
-
-export const fila = 'flex items-center gap-2 border-b border-borde py-[9px] last:border-b-0 max-[520px]:flex-wrap';
-export const tituloFila = 'min-w-0 flex-1 overflow-hidden text-[14px] font-semibold text-ellipsis';
-export const pista = 'mb-[14px] text-[13px] text-tenue';
+export const campo = `h-10 w-full min-w-0 rounded-[10px] border border-borde-control bg-tarjeta px-3 text-[14px] leading-5 text-texto ${transicion} focus:border-acento`;
+export const fila = `-mx-2 border-b border-borde px-2 py-3 last:border-b-0 ${transicion} hover:bg-superficie`;
+export const tituloElemento = 'text-[15px] leading-5 font-medium';
+export const pista = 'text-[13px] leading-[18px] text-tenue';

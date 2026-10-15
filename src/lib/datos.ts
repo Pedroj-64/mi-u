@@ -1,4 +1,5 @@
 // Cambios sobre los datos de la app. Cada función devuelve datos nuevos sin modificar los recibidos.
+import { siguienteColor } from './colores.ts';
 import type { Datos, Entrega, Materia } from './tipos.ts';
 
 export type CampoEnlace = 'clase' | 'moodle' | 'classroom';
@@ -12,7 +13,8 @@ export function nombreMateria(materias: Materia[], id: string): string {
 }
 
 export function agregarMateria(datos: Datos, nombre: string): Datos {
-  return { ...datos, materias: [...datos.materias, { id: nuevoId(), nombre, clase: '', moodle: '', classroom: '' }] };
+  const color = siguienteColor(datos.materias.map((m) => m.color));
+  return { ...datos, materias: [...datos.materias, { id: nuevoId(), nombre, color, clase: '', moodle: '', classroom: '' }] };
 }
 
 /** Quita la materia (con sus enlaces) y también sus entregas. */

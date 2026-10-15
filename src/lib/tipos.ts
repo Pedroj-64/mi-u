@@ -1,8 +1,11 @@
 // Forma de los datos que Mi U guarda en localStorage (clave "mi-u-v1").
+import type { ColorMateria } from './colores.ts';
 
 export interface Materia {
   id: string;
   nombre: string;
+  /** Color para reconocerla de un vistazo (ver "Colores de materia" en docs/diseno.md). */
+  color: ColorMateria;
   /** Enlace de la clase virtual (Meet, Zoom o Teams). */
   clase: string;
   /** Enlace del aula en Moodle. */

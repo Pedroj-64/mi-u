@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { debeAvisar, estadoEntrega, etiquetaEstado, ordenarEntregas, type EstadoEntrega } from './entregas.ts';
+import {
+  debeAvisar,
+  estadoEntrega,
+  etiquetaEstado,
+  ordenarEntregas,
+  resumenEntregas,
+  type EstadoEntrega,
+} from './entregas.ts';
 import type { Entrega } from './tipos.ts';
 
 // Miércoles 14 de octubre de 2026, 9:00 a. m. en Bogotá. En Tokio, la zona en la
@@ -96,5 +103,19 @@ describe('ordenarEntregas', () => {
       'hecha-tarde',
     ]);
     expect(lista[0].id).toBe('hecha-tarde');
+  });
+});
+
+describe('resumenEntregas', () => {
+  it('cuenta solo pendientes: vencidas, para hoy y de mañana hasta 7 días de calendario', () => {
+    const lista = [
+      entrega('2026-10-14T08:00:00-05:00'),
+      entrega('2026-10-14T23:59:00-05:00'),
+      entrega('2026-10-15T00:00:00-05:00'),
+      entrega('2026-10-21T23:59:00-05:00'),
+      entrega('2026-10-22T00:00:00-05:00'),
+      entrega('2026-10-15T10:00:00-05:00', { hecha: true }),
+    ];
+    expect(resumenEntregas(lista, ahora)).toEqual({ vencidas: 1, hoy: 1, proximos: 2 });
   });
 });

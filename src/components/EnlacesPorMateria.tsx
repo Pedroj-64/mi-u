@@ -1,8 +1,11 @@
+import { ArrowDown, BookPlus, ExternalLink } from 'lucide-react';
 import { useState } from 'react';
 import type { CampoEnlace } from '../lib/datos.ts';
 import { abrirEnlace } from '../lib/enlaces.ts';
 import type { Materia } from '../lib/tipos.ts';
-import { boton, campo as claseCampo, fila, pista } from './estilos.ts';
+import EstadoVacio from './EstadoVacio.tsx';
+import { botonSecundario, campo as claseCampo, fila, tituloElemento } from './estilos.ts';
+import PuntoMateria from './PuntoMateria.tsx';
 
 interface Props {
   materias: Materia[];
@@ -11,28 +14,48 @@ interface Props {
 }
 
 /** Props de las secciones que usan estas filas (Clases virtuales, Moodle y Classroom). */
-export type PropsSeccionEnlaces = Omit<Props, 'campo'>;
+export type PropsSeccionEnlaces = Omit<Props, 'campo'> & { className?: string };
 
-/** Una fila por materia con su enlace y el botón Abrir, que solo se habilita con un enlace guardado. */
+/**
+ * Una fila por materia: el nombre arriba y, debajo, el enlace con su botón Abrir, que solo se
+ * habilita con un enlace guardado. Va apilada en todos los tamaños porque estas tarjetas son angostas.
+ */
 export default function EnlacesPorMateria({ materias, campo, onGuardar }: Props) {
-  if (materias.length === 0) return <p className={pista}>Primero agrega tus materias.</p>;
+  if (materias.length === 0) {
+    return (
+      <EstadoVacio
+        icono={BookPlus}
+        titulo="Primero agrega tus materias"
+        texto="Aquí aparecerá una fila por materia para guardar su enlace."
+        accion="Ir a Mis materias"
+        iconoAccion={ArrowDown}
+        enfocar="nueva-materia"
+      />
+    );
+  }
   return (
     <ul>
       {materias.map((m) => (
-        <li key={m.id} className={fila}>
-          <span className="flex-[0_0_165px] truncate text-[14px] font-semibold max-[520px]:basis-full" title={m.nombre}>
-            {m.nombre}
+        <li key={m.id} className={`${fila} grid gap-2`}>
+          <span className="flex min-w-0 items-center gap-2">
+            <PuntoMateria color={m.color} />
+            <span className={`${tituloElemento} truncate`} title={m.nombre}>
+              {m.nombre}
+            </span>
           </span>
-          <CampoEnlace nombre={m.nombre} valor={m[campo]} onGuardar={(url) => onGuardar(m.id, campo, url)} />
-          <button
-            type="button"
-            className={boton}
-            disabled={!m[campo]}
-            aria-label={`Abrir ${m.nombre}`}
-            onClick={() => abrirEnlace(m[campo])}
-          >
-            Abrir
-          </button>
+          <div className="flex gap-2">
+            <CampoDeEnlace nombre={m.nombre} valor={m[campo]} onGuardar={(url) => onGuardar(m.id, campo, url)} />
+            <button
+              type="button"
+              className={botonSecundario}
+              disabled={!m[campo]}
+              aria-label={`Abrir ${m.nombre}`}
+              onClick={() => abrirEnlace(m[campo])}
+            >
+              <ExternalLink size={16} aria-hidden="true" />
+              Abrir
+            </button>
+          </div>
         </li>
       ))}
     </ul>
@@ -46,7 +69,7 @@ interface PropsCampo {
 }
 
 /** Como en mi-u.html, el enlace se guarda al confirmar el campo (al salir de él o con Enter), no en cada tecla. */
-function CampoEnlace({ nombre, valor, onGuardar }: PropsCampo) {
+function CampoDeEnlace({ nombre, valor, onGuardar }: PropsCampo) {
   const [borrador, setBorrador] = useState(valor);
   const confirmar = () => {
     const url = borrador.trim();
@@ -57,7 +80,7 @@ function CampoEnlace({ nombre, valor, onGuardar }: PropsCampo) {
     <input
       type="text"
       aria-label={`Enlace de ${nombre}`}
-      className={`${claseCampo} min-w-0 flex-1 max-[520px]:basis-[calc(100%-90px)]`}
+      className={`${claseCampo} flex-1`}
       placeholder="Pega el enlace"
       value={borrador}
       onChange={(e) => setBorrador(e.target.value)}

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { storageFalso } from '../test/storage-falso.ts';
 import { abrirAlmacen, CLAVE, CLAVE_CORRUPTO, type AlmacenWeb } from './almacen.ts';
+import { COLORES_MATERIA } from './colores.ts';
 import type { Datos } from './tipos.ts';
 
 const MATERIAS_BASE = [
@@ -14,7 +15,7 @@ const MATERIAS_BASE = [
 ];
 
 const datosNuevos: Datos = {
-  materias: [{ id: 'm1', nombre: 'Ingeniería de Software', clase: 'https://meet.google.com/abc', moodle: '', classroom: '' }],
+  materias: [{ id: 'm1', nombre: 'Ingeniería de Software', color: 'orquidea', clase: 'https://meet.google.com/abc', moodle: '', classroom: '' }],
   entregas: [{ id: 'e1', materia: 'm1', texto: 'Taller 3', fecha: '2026-10-20T20:00:00-05:00', hecha: false, avisada: false }],
   drive: [{ id: 'd1', nombre: 'Carpeta de PETI', url: 'https://drive.google.com/drive/folders/abc' }],
 };
@@ -141,5 +142,28 @@ describe('abrirAlmacen', () => {
 
     expect(almacen.aviso).toBeNull();
     expect(almacen.guardar(datosNuevos)).toMatch(/está lleno/);
+  });
+});
+
+describe('color de las materias al cargar', () => {
+  const guardadas = (materias: object[]) => storageFalso({ [CLAVE]: JSON.stringify({ materias, entregas: [], drive: [] }) });
+  const sinColor = (id: string) => ({ id, nombre: `Materia ${id}`, clase: '', moodle: '', classroom: '' });
+
+  it('las materias base reciben los siete primeros colores', () => {
+    expect(abrirAlmacen(storageFalso()).datos.materias.map((m) => m.color)).toEqual(COLORES_MATERIA.slice(0, 7));
+  });
+
+  it('los datos de mi-u.html, sin color, reciben los colores en el orden de la lista', () => {
+    const { datos, aviso } = abrirAlmacen(guardadas([sinColor('a'), sinColor('b'), sinColor('c')]));
+    expect(aviso).toBeNull();
+    expect(datos.materias.map((m) => m.color)).toEqual(['orquidea', 'oliva', 'magenta']);
+  });
+
+  it('conserva los colores válidos y da a las demás el primero libre, también si la clave no existe', () => {
+    const { datos, aviso } = abrirAlmacen(
+      guardadas([{ ...sinColor('a'), color: 'oliva' }, sinColor('b'), { ...sinColor('c'), color: 'azul' }, { ...sinColor('d'), color: 'orquidea' }]),
+    );
+    expect(aviso).toBeNull();
+    expect(datos.materias.map((m) => m.color)).toEqual(['oliva', 'magenta', 'turquesa', 'orquidea']);
   });
 });

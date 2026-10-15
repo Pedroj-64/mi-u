@@ -1,3 +1,4 @@
+import { TriangleAlert } from 'lucide-react';
 import { useSyncExternalStore } from 'react';
 import AulaMoodle from './components/AulaMoodle.tsx';
 import ClasesVirtuales from './components/ClasesVirtuales.tsx';
@@ -21,6 +22,7 @@ import {
   quitarMateria,
   type CampoEnlace,
 } from './lib/datos.ts';
+import { resumenEntregas } from './lib/entregas.ts';
 import type { Store } from './lib/store.ts';
 
 export default function App({ store }: { store: Store }) {
@@ -33,37 +35,41 @@ export default function App({ store }: { store: Store }) {
 
   return (
     <>
-      <Encabezado ahora={ahora} />
-      <main className="mx-auto grid max-w-[1100px] grid-cols-[repeat(auto-fit,minmax(320px,1fr))] gap-4 p-4">
+      <Encabezado ahora={ahora} resumen={resumenEntregas(datos.entregas, ahora)} />
+      {/* Escritorio: Entregas a todo el ancho, luego tres tarjetas de enlaces y luego Drive y Mis materias. */}
+      <main className="mx-auto grid max-w-[1120px] gap-4 px-4 pb-10 md:grid-cols-2 md:gap-5 md:px-6 lg:grid-cols-6">
         {avisos.map((aviso) => (
-          <p
+          <div
             key={aviso}
             role="alert"
-            className="col-span-full rounded-[14px] bg-alerta-suave px-[18px] py-3 text-[13px]"
+            className="flex items-start gap-3 rounded-xl bg-aviso-fondo px-4 py-3 text-[14px] leading-5 md:col-span-2 lg:col-span-6"
           >
-            {aviso}
-          </p>
+            <TriangleAlert size={20} className="shrink-0 text-aviso" aria-hidden="true" />
+            <p>{aviso}</p>
+          </div>
         ))}
         <Entregas
+          className="md:col-span-2 lg:col-span-6"
           entregas={datos.entregas}
           materias={datos.materias}
           ahora={ahora}
-          nombreMateria={nombreDe}
           mostrarBotonAvisos={avisosNavegador.mostrarBoton}
           onPedirAvisos={avisosNavegador.pedirPermiso}
           onAgregar={(entrega) => store.actualizar((d) => agregarEntrega(d, entrega))}
           onAlternar={(id) => store.actualizar((d) => alternarEntrega(d, id))}
           onBorrar={(id) => store.actualizar((d) => borrarEntrega(d, id))}
         />
-        <ClasesVirtuales materias={datos.materias} onGuardar={guardarEnlaceDe} />
-        <AulaMoodle materias={datos.materias} onGuardar={guardarEnlaceDe} />
-        <Classroom materias={datos.materias} onGuardar={guardarEnlaceDe} />
+        <ClasesVirtuales className="lg:col-span-2" materias={datos.materias} onGuardar={guardarEnlaceDe} />
+        <AulaMoodle className="lg:col-span-2" materias={datos.materias} onGuardar={guardarEnlaceDe} />
+        <Classroom className="lg:col-span-2" materias={datos.materias} onGuardar={guardarEnlaceDe} />
         <Drive
+          className="lg:col-span-3"
           enlaces={datos.drive}
           onAgregar={(nombre, url) => store.actualizar((d) => agregarDrive(d, nombre, url))}
           onQuitar={(id) => store.actualizar((d) => quitarDrive(d, id))}
         />
         <Materias
+          className="md:col-span-2 lg:col-span-3"
           materias={datos.materias}
           onAgregar={(nombre) => store.actualizar((d) => agregarMateria(d, nombre))}
           onQuitar={(id) => store.actualizar((d) => quitarMateria(d, id))}

@@ -13,9 +13,10 @@ import { storageFalso } from './test/storage-falso.ts';
 // Miércoles 14 de octubre de 2026, 9:00 a. m. en Bogotá.
 const AHORA = new Date('2026-10-14T09:00:00-05:00');
 
-const materia = (id: string, nombre: string, enlaces: Partial<Materia> = {}): Materia => ({
+const materia = (id: string, nombre: string, enlaces: Partial<Pick<Materia, 'clase' | 'moodle' | 'classroom'>> = {}): Materia => ({
   id,
   nombre,
+  color: 'orquidea',
   clase: '',
   moodle: '',
   classroom: '',
@@ -58,7 +59,7 @@ describe('Entregas', () => {
     const entregas = seccion('Entregas');
 
     await usuario.selectOptions(within(entregas).getByLabelText('Materia'), 'Ingeniería de Software');
-    await usuario.type(within(entregas).getByPlaceholderText('Descripción (ej. Taller 3)'), 'Taller 3');
+    await usuario.type(within(entregas).getByLabelText('Descripción'), 'Taller 3');
     fireEvent.change(within(entregas).getByLabelText('Fecha límite'), { target: { value: '2026-10-14T23:59' } });
     await usuario.click(within(entregas).getByRole('button', { name: 'Agregar' }));
 
@@ -67,12 +68,12 @@ describe('Entregas', () => {
     expect(fila).toHaveTextContent('Ingeniería de Software · mié, 14 de oct, 11:59 p. m.');
     expect(fila).toHaveTextContent('Para hoy');
     expect(guardado().entregas).toMatchObject([{ texto: 'Taller 3', fecha: '2026-10-14T23:59:00-05:00', hecha: false }]);
-    expect(within(entregas).getByPlaceholderText('Descripción (ej. Taller 3)')).toHaveValue('');
+    expect(within(entregas).getByLabelText('Descripción')).toHaveValue('');
 
     await usuario.click(within(fila).getByRole('button', { name: 'Borrar Taller 3' }));
 
     expect(filas(entregas)).toHaveLength(0);
-    expect(within(entregas).getByText('Sin entregas registradas.')).toBeInTheDocument();
+    expect(within(entregas).getByText('Todavía no tienes entregas')).toBeInTheDocument();
     expect(guardado().entregas).toEqual([]);
   });
 
@@ -80,7 +81,7 @@ describe('Entregas', () => {
     const alerta = vi.spyOn(window, 'alert').mockImplementation(() => {});
     const { usuario } = montar();
 
-    await usuario.type(screen.getByPlaceholderText('Descripción (ej. Taller 3)'), 'Taller 3');
+    await usuario.type(screen.getByLabelText('Descripción'), 'Taller 3');
     await usuario.click(within(seccion('Entregas')).getByRole('button', { name: 'Agregar' }));
 
     expect(alerta).toHaveBeenCalledWith('Completa materia, descripción y fecha.');
@@ -117,7 +118,7 @@ describe('Mis materias', () => {
     const { usuario, guardado } = montar();
     const materias = seccion('Mis materias');
 
-    await usuario.type(within(materias).getByPlaceholderText('Nueva materia'), '  Cálculo Integral ');
+    await usuario.type(within(materias).getByLabelText('Nueva materia'), '  Cálculo Integral ');
     await usuario.click(within(materias).getByRole('button', { name: 'Agregar' }));
 
     expect(within(materias).getByText('Cálculo Integral')).toBeInTheDocument();
@@ -205,8 +206,8 @@ describe('Drive', () => {
     const { usuario, guardado } = montar();
     const drive = seccion('Drive');
 
-    await usuario.type(within(drive).getByPlaceholderText('Nombre (ej. Carpeta de PETI)'), 'Carpeta de PETI');
-    await usuario.type(within(drive).getByPlaceholderText('Enlace'), 'drive.google.com/drive/folders/abc');
+    await usuario.type(within(drive).getByLabelText('Nombre'), 'Carpeta de PETI');
+    await usuario.type(within(drive).getByLabelText('Enlace'), 'drive.google.com/drive/folders/abc');
     await usuario.click(within(drive).getByRole('button', { name: 'Guardar' }));
 
     expect(filas(drive)).toHaveLength(1);
@@ -225,7 +226,7 @@ describe('Encabezado', () => {
   it('muestra la fecha de hoy en es-CO, con el día de Bogotá', () => {
     vi.setSystemTime(new Date('2026-10-14T20:00:00-05:00')); // En Tokio ya es el 15.
     montar();
-    expect(screen.getByRole('banner')).toHaveTextContent('miércoles, 14 de octubre de 2026');
+    expect(screen.getByRole('banner')).toHaveTextContent('Miércoles, 14 de octubre de 2026');
   });
 });
 
@@ -322,6 +323,7 @@ describe('Avisos del almacén', () => {
   it('muestra un mensaje si localStorage está bloqueado', () => {
     render(<App store={crearStore(abrirAlmacen(null))} />);
     expect(screen.getByRole('alert')).toHaveTextContent('El navegador no deja guardar datos en este sitio.');
+    expect(screen.getByRole('alert').querySelector('svg')).toBeInTheDocument();
   });
 
   it('muestra un mensaje si localStorage se llena al guardar, y el cambio sigue en pantalla', async () => {
@@ -334,10 +336,60 @@ describe('Avisos del almacén', () => {
     const { usuario } = montar(undefined, lleno);
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
 
-    await usuario.type(screen.getByPlaceholderText('Nueva materia'), 'Cálculo Integral');
+    await usuario.type(screen.getByLabelText('Nueva materia'), 'Cálculo Integral');
     await usuario.click(within(seccion('Mis materias')).getByRole('button', { name: 'Agregar' }));
 
     expect(screen.getByRole('alert')).toHaveTextContent('El almacenamiento del navegador está lleno');
     expect(within(seccion('Mis materias')).getByText('Cálculo Integral')).toBeInTheDocument();
+  });
+});
+
+describe('Encabezado y contadores', () => {
+  it('saluda según la hora de Bogotá', () => {
+    vi.setSystemTime(new Date('2026-10-14T20:00:00-05:00')); // En Tokio ya son las 10:00 del 15.
+    montar();
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Buenas noches');
+  });
+
+  it('cuenta vencidas, para hoy y próximos 7 días, solo de entregas pendientes', () => {
+    montar({
+      materias: [materia('m1', 'Ingeniería de Software')],
+      entregas: [
+        entrega('e1', 'm1', 'Parcial', '2026-10-13T18:00:00-05:00'),
+        entrega('e2', 'm1', 'Taller', '2026-10-14T23:59:00-05:00'),
+        entrega('e3', 'm1', 'Quiz', '2026-10-15T07:00:00-05:00'),
+        entrega('e4', 'm1', 'Informe', '2026-10-21T08:00:00-05:00'),
+        entrega('e5', 'm1', 'Proyecto', '2026-10-22T08:00:00-05:00'),
+        { ...entrega('e6', 'm1', 'Lectura', '2026-10-15T08:00:00-05:00'), hecha: true },
+      ],
+      drive: [],
+    });
+    const resumen = screen.getByRole('list', { name: 'Resumen de entregas' });
+    expect(within(resumen).getAllByRole('listitem').map((c) => c.textContent)).toEqual([
+      '1Vencidas',
+      '1Para hoy',
+      '2Próximos 7 días',
+    ]);
+  });
+});
+
+describe('Estados vacíos', () => {
+  it('el botón de cada estado vacío lleva el foco al campo donde se empieza', async () => {
+    const { usuario } = montar({ materias: [], entregas: [], drive: [] });
+
+    await usuario.click(within(seccion('Entregas')).getByRole('button', { name: 'Agregar entrega' }));
+    expect(screen.getByLabelText('Descripción')).toHaveFocus();
+
+    await usuario.click(within(seccion('Drive')).getByRole('button', { name: 'Agregar enlace' }));
+    expect(screen.getByLabelText('Nombre')).toHaveFocus();
+
+    await usuario.click(within(seccion('Mis materias')).getByRole('button', { name: 'Agregar materia' }));
+    expect(screen.getByLabelText('Nueva materia')).toHaveFocus();
+
+    for (const titulo of ['Clases virtuales', 'Aula virtual (Moodle)', 'Classroom']) {
+      screen.getByLabelText('Descripción').focus();
+      await usuario.click(within(seccion(titulo)).getByRole('button', { name: 'Ir a Mis materias' }));
+      expect(screen.getByLabelText('Nueva materia')).toHaveFocus();
+    }
   });
 });

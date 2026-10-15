@@ -1,3 +1,4 @@
+import { esColorMateria, siguienteColor, type ColorMateria } from './colores.ts';
 import { nuevoId } from './datos.ts';
 import { aIsoBogota, esIsoBogota } from './fechas.ts';
 import type { Datos, DriveLink, Entrega, Materia } from './tipos.ts';
@@ -80,7 +81,7 @@ function localStorageDelNavegador(): AlmacenWeb | null {
 
 function estadoInicial(): Datos {
   return {
-    materias: MATERIAS_BASE.map((nombre) => ({ id: nuevoId(), nombre, clase: '', moodle: '', classroom: '' })),
+    materias: asignarColores(MATERIAS_BASE.map((nombre) => ({ id: nuevoId(), nombre, clase: '', moodle: '', classroom: '' }))),
     entregas: [],
     drive: [],
   };
@@ -110,12 +111,23 @@ function interpretar(crudo: string): Datos | null {
     if (!esObjeto(valor)) return null;
     const { materias, drive } = valor;
     const entregas = Array.isArray(valor.entregas) ? valor.entregas.map(migrarEntrega) : null;
-    if (!esLista(materias, esMateria) || !esLista(entregas, esEntrega) || !esLista(drive, esDriveLink)) return null;
-    return { ...valor, materias, entregas, drive };
+    if (!esLista(materias, esMateriaGuardada) || !esLista(entregas, esEntrega) || !esLista(drive, esDriveLink)) return null;
+    return { ...valor, materias: asignarColores(materias), entregas, drive };
   } catch {
     // JSON mal formado, o una fecha en milisegundos fuera de rango.
     return null;
   }
+}
+
+/** Da color a las materias que no tienen uno válido, en orden y con la misma regla que una materia nueva. */
+function asignarColores<T extends Record<string, unknown>>(materias: T[]): (T & { color: ColorMateria })[] {
+  const usados = materias.map((m) => m.color).filter(esColorMateria);
+  return materias.map((m) => {
+    if (esColorMateria(m.color)) return { ...m, color: m.color };
+    const color = siguienteColor(usados);
+    usados.push(color);
+    return { ...m, color };
+  });
 }
 
 /** mi-u.html guardaba la fecha en milisegundos; ahora es texto ISO con el desfase de Bogotá. */
@@ -135,7 +147,8 @@ function tieneTextos(valor: Record<string, unknown>, campos: string[]): boolean 
   return campos.every((campo) => typeof valor[campo] === 'string');
 }
 
-function esMateria(valor: unknown): valor is Materia {
+/** Una materia guardada; el color puede faltar (datos de mi-u.html) porque se asigna al cargar. */
+function esMateriaGuardada(valor: unknown): valor is Omit<Materia, 'color'> & { color?: unknown } {
   return esObjeto(valor) && tieneTextos(valor, ['id', 'nombre', 'clase', 'moodle', 'classroom']);
 }
 

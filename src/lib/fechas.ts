@@ -64,7 +64,16 @@ export function formatoFechaEntrega(fecha: string): string {
   return formatoEntrega.format(Date.parse(fecha));
 }
 
-/** Fecha del encabezado: "miércoles, 14 de octubre de 2026". */
+/** Fecha del encabezado, con mayúscula inicial: "Miércoles, 14 de octubre de 2026". */
 export function formatoEncabezado(instante: number): string {
-  return formatoLargo.format(instante);
+  const texto = formatoLargo.format(instante);
+  return texto.charAt(0).toLocaleUpperCase('es-CO') + texto.slice(1);
+}
+
+/** Saludo según la hora de Bogotá: días de 5:00 a 11:59, tardes de 12:00 a 18:59 y noches el resto. */
+export function saludo(instante: number): string {
+  const hora = new Date(instante + DESFASE_MS).getUTCHours();
+  if (hora >= 5 && hora < 12) return 'Buenos días';
+  if (hora >= 12 && hora < 19) return 'Buenas tardes';
+  return 'Buenas noches';
 }

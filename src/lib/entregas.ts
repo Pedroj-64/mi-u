@@ -37,6 +37,25 @@ export function etiquetaEstado(estado: EstadoEntrega): string {
   }
 }
 
+export interface ResumenEntregas {
+  vencidas: number;
+  hoy: number;
+  /** Pendientes que vencen de mañana en adelante, hasta 7 días de calendario. */
+  proximos: number;
+}
+
+/** Contadores del encabezado; solo cuentan entregas pendientes. */
+export function resumenEntregas(entregas: Entrega[], ahora: number): ResumenEntregas {
+  const resumen = { vencidas: 0, hoy: 0, proximos: 0 };
+  for (const entrega of entregas) {
+    const estado = estadoEntrega(entrega, ahora);
+    if (estado.tipo === 'vencida') resumen.vencidas++;
+    else if (estado.tipo === 'hoy') resumen.hoy++;
+    else if (estado.tipo === 'manana' || (estado.tipo === 'dias' && estado.dias <= 7)) resumen.proximos++;
+  }
+  return resumen;
+}
+
 /** Pendientes primero y entregadas al final; dentro de cada grupo, por fecha, como en mi-u.html. */
 export function ordenarEntregas(entregas: Entrega[]): Entrega[] {
   return [...entregas].sort((a, b) => Number(a.hecha) - Number(b.hecha) || Date.parse(a.fecha) - Date.parse(b.fecha));

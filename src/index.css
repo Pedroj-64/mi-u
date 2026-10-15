@@ -4,91 +4,59 @@
  * Paleta de docs/diseno.md. src/diseno.test.ts comprueba que estos valores coinciden con las tablas
  * del documento: si cambias un color aquí, cámbialo también allá.
  * "static" emite siempre todas las variables, aunque ninguna clase las use todavía.
+ * Cada color es light-dark(claro, oscuro): sigue al sistema y el selector de tema lo fuerza con data-tema.
  */
 @theme static {
   --font-sans: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --ease-estandar: cubic-bezier(0.2, 0, 0, 1);
-  --sombra-tarjeta: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.06);
+  --sombra-tarjeta: 0 1px 2px light-dark(rgba(16, 24, 40, 0.04), rgba(0, 0, 0, 0.4)),
+    0 1px 3px light-dark(rgba(16, 24, 40, 0.06), transparent);
 
-  --color-fondo: #f5f6fa;
-  --color-tarjeta: #ffffff;
-  --color-superficie: #f1f3f8;
-  --color-borde: #e3e7ef;
-  --color-borde-control: #838c9e;
-  --color-texto: #1a2030;
-  --color-tenue: #596275;
-  --color-acento: #4f46e5;
-  --color-acento-hover: #4338ca;
-  --color-acento-suave: #eef0fe;
-  --color-sobre-acento: #ffffff;
-  --color-foco: #4f46e5;
-  --color-entregada: #166534;
-  --color-entregada-fondo: #e6f4ea;
-  --color-vencida: #b42318;
-  --color-vencida-fondo: #fdecea;
-  --color-hoy: #924a00;
-  --color-hoy-fondo: #fff1db;
-  --color-manana: #1d4ed8;
-  --color-manana-fondo: #e8eefd;
-  --color-dias: #475467;
-  --color-dias-fondo: #eef1f6;
-  --color-aviso: #924a00;
-  --color-aviso-fondo: #fff1db;
+  --color-fondo: light-dark(#f5f6fa, #0b0f19);
+  --color-tarjeta: light-dark(#ffffff, #141a28);
+  --color-superficie: light-dark(#f1f3f8, #1b2233);
+  --color-borde: light-dark(#e3e7ef, #272f44);
+  --color-borde-control: light-dark(#838c9e, #6b7590);
+  --color-texto: light-dark(#1a2030, #e8ebf3);
+  --color-tenue: light-dark(#596275, #a3abbe);
+  --color-acento: light-dark(#4f46e5, #a5b4fc);
+  --color-acento-hover: light-dark(#4338ca, #c7d0fe);
+  --color-acento-suave: light-dark(#eef0fe, #262c55);
+  --color-sobre-acento: light-dark(#ffffff, #151a3d);
+  --color-foco: light-dark(#4f46e5, #a5b4fc);
+  --color-entregada: light-dark(#166534, #7ddca4);
+  --color-entregada-fondo: light-dark(#e6f4ea, #11291d);
+  --color-vencida: light-dark(#b42318, #fda4a4);
+  --color-vencida-fondo: light-dark(#fdecea, #36161a);
+  --color-hoy: light-dark(#924a00, #f6c77e);
+  --color-hoy-fondo: light-dark(#fff1db, #33250f);
+  --color-manana: light-dark(#1d4ed8, #a4befd);
+  --color-manana-fondo: light-dark(#e8eefd, #182548);
+  --color-dias: light-dark(#475467, #c3cad9);
+  --color-dias-fondo: light-dark(#eef1f6, #212839);
+  --color-aviso: light-dark(#924a00, #f6c77e);
+  --color-aviso-fondo: light-dark(#fff1db, #33250f);
 
-  --color-materia-orquidea: #b661da;
-  --color-materia-oliva: #516000;
-  --color-materia-magenta: #a42f96;
-  --color-materia-turquesa: #00a19e;
-  --color-materia-violeta: #7b45c4;
-  --color-materia-rosa: #db509e;
-  --color-materia-lima: #929300;
-  --color-materia-petroleo: #00729c;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --sombra-tarjeta: 0 1px 2px rgba(0, 0, 0, 0.4);
-
-    --color-fondo: #0b0f19;
-    --color-tarjeta: #141a28;
-    --color-superficie: #1b2233;
-    --color-borde: #272f44;
-    --color-borde-control: #6b7590;
-    --color-texto: #e8ebf3;
-    --color-tenue: #a3abbe;
-    --color-acento: #a5b4fc;
-    --color-acento-hover: #c7d0fe;
-    --color-acento-suave: #262c55;
-    --color-sobre-acento: #151a3d;
-    --color-foco: #a5b4fc;
-    --color-entregada: #7ddca4;
-    --color-entregada-fondo: #11291d;
-    --color-vencida: #fda4a4;
-    --color-vencida-fondo: #36161a;
-    --color-hoy: #f6c77e;
-    --color-hoy-fondo: #33250f;
-    --color-manana: #a4befd;
-    --color-manana-fondo: #182548;
-    --color-dias: #c3cad9;
-    --color-dias-fondo: #212839;
-    --color-aviso: #f6c77e;
-    --color-aviso-fondo: #33250f;
-
-    --color-materia-orquidea: #be69e2;
-    --color-materia-oliva: #637500;
-    --color-materia-magenta: #b642a8;
-    --color-materia-turquesa: #00a9a7;
-    --color-materia-violeta: #8a56d7;
-    --color-materia-rosa: #e458a6;
-    --color-materia-lima: #9a9a00;
-    --color-materia-petroleo: #0083b3;
-  }
+  --color-materia-orquidea: light-dark(#b661da, #be69e2);
+  --color-materia-oliva: light-dark(#516000, #637500);
+  --color-materia-magenta: light-dark(#a42f96, #b642a8);
+  --color-materia-turquesa: light-dark(#00a19e, #00a9a7);
+  --color-materia-violeta: light-dark(#7b45c4, #8a56d7);
+  --color-materia-rosa: light-dark(#db509e, #e458a6);
+  --color-materia-lima: light-dark(#929300, #9a9a00);
+  --color-materia-petroleo: light-dark(#00729c, #0083b3);
 }
 
 @layer base {
   /* Con esto el navegador dibuja en oscuro sus propios controles (lista, fecha, casilla). */
   :root {
     color-scheme: light dark;
+  }
+  :root[data-tema='claro'] {
+    color-scheme: light;
+  }
+  :root[data-tema='oscuro'] {
+    color-scheme: dark;
   }
 
   body {

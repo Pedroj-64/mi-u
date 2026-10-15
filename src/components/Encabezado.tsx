@@ -1,6 +1,7 @@
 import { CalendarDays, CircleAlert, Clock, type LucideIcon } from 'lucide-react';
 import type { ResumenEntregas } from '../lib/entregas.ts';
 import { formatoEncabezado, saludo } from '../lib/fechas.ts';
+import SelectorTema from './SelectorTema.tsx';
 
 interface Props {
   ahora: number;
@@ -10,10 +11,13 @@ interface Props {
 export default function Encabezado({ ahora, resumen }: Props) {
   return (
     <header className="mx-auto max-w-[1120px] px-4 pt-6 pb-4 md:px-6 md:pt-10 md:pb-6">
-      <p className="flex items-center gap-2 text-[15px] leading-5 font-bold">
-        <Marca />
-        Mi U
-      </p>
+      <div className="flex items-center justify-between gap-3">
+        <p className="flex items-center gap-2 text-[15px] leading-5 font-bold">
+          <Marca />
+          Mi U
+        </p>
+        <SelectorTema />
+      </div>
       <div className="mt-3 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <h1 className="text-[24px] leading-[30px] font-bold tracking-[-0.02em] md:text-[28px] md:leading-[34px]">

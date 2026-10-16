@@ -516,3 +516,38 @@ describe('Vista semanal', () => {
     expect(semana()).toHaveTextContent('Parcial 1');
   });
 });
+
+describe('Deshacer y respaldo', () => {
+  it('quitar un enlace de Drive se puede deshacer', async () => {
+    const { usuario } = montar({
+      materias: [],
+      entregas: [],
+      drive: [{ id: 'd1', nombre: 'Carpeta de PETI', url: 'https://drive.google.com' }],
+    });
+
+    await usuario.click(screen.getByRole('button', { name: 'Quitar Carpeta de PETI' }));
+    expect(screen.queryByText('Carpeta de PETI')).not.toBeInTheDocument();
+    await usuario.click(screen.getByRole('button', { name: 'Deshacer' }));
+    expect(screen.getByText('Carpeta de PETI')).toBeInTheDocument();
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+  });
+
+  it('importar un respaldo reemplaza los datos y se puede deshacer', async () => {
+    const { usuario, guardado } = montar({ materias: [], entregas: [], drive: [] });
+    const respaldo = JSON.stringify({
+      materias: [materia('m9', 'Física')],
+      entregas: [],
+      drive: [],
+    });
+
+    await usuario.upload(
+      screen.getByLabelText('Archivo de respaldo'),
+      new File([respaldo], 'mi-u.json', { type: 'application/json' }),
+    );
+    expect(await within(seccion('Mis materias')).findByText('Física')).toBeInTheDocument();
+    expect(guardado().materias).toHaveLength(1);
+
+    await usuario.click(screen.getByRole('button', { name: 'Deshacer' }));
+    expect(within(seccion('Mis materias')).queryByText('Física')).not.toBeInTheDocument();
+  });
+});

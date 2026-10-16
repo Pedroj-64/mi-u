@@ -35,14 +35,14 @@ Para usarla, abre `mi-u.html` en cualquier navegador moderno.
 
 ## Hoja de ruta
 
-- [ ] Reestructurar el proyecto con Vite + React + TypeScript
-- [ ] Rediseño visual con modo claro y oscuro
-- [ ] Vista semanal de entregas
-- [ ] Filtros y búsqueda
+- [x] Reestructurar el proyecto con Vite + React + TypeScript
+- [x] Rediseño visual con modo claro y oscuro
+- [x] Vista semanal de entregas
+- [x] Filtros y búsqueda
 - [ ] Ordenar materias arrastrándolas
-- [ ] Exportar e importar datos en JSON
-- [ ] Deshacer al borrar
-- [ ] Pruebas unitarias para la lógica de fechas y estados
+- [x] Exportar e importar datos en JSON
+- [x] Deshacer al borrar
+- [x] Pruebas unitarias para la lógica de fechas y estados
 - [ ] Atajos de teclado
 
 ## Pendientes

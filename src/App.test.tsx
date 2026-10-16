@@ -577,3 +577,32 @@ describe('Orden de materias y atajos', () => {
     expect(screen.getByLabelText('Buscar entregas')).toHaveFocus();
   });
 });
+
+describe('Tema', () => {
+  const guardado = new Map<string, string>();
+  beforeEach(() => {
+    guardado.clear();
+    vi.stubGlobal('localStorage', {
+      getItem: (k: string) => guardado.get(k) ?? null,
+      setItem: (k: string, v: string) => guardado.set(k, v),
+      removeItem: (k: string) => guardado.delete(k),
+    });
+  });
+  afterEach(() => {
+    delete document.documentElement.dataset.tema;
+  });
+
+  it('fuerza el tema oscuro, lo recuerda y vuelve a seguir al sistema', async () => {
+    const { usuario } = montar();
+    const grupo = screen.getByRole('group', { name: 'Tema' });
+
+    await usuario.click(within(grupo).getByRole('button', { name: 'Oscuro' }));
+    expect(document.documentElement.dataset.tema).toBe('oscuro');
+    expect(guardado.get('mi-u-tema')).toBe('oscuro');
+
+    await usuario.click(within(grupo).getByRole('button', { name: 'Sistema' }));
+    expect(document.documentElement.dataset.tema).toBeUndefined();
+    expect(guardado.has('mi-u-tema')).toBe(false);
+  });
+});
+

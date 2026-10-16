@@ -38,18 +38,11 @@ const pares = primeraTabla('Pares de contraste').map(([elemento, color, sobre, m
   documentado: { claro: numero(claro), oscuro: numero(oscuro) },
 }));
 
-/** Colores `--color-*` declarados en un bloque de index.css, en mayúsculas. */
-function coloresDelBloque(desde: string): Record<string, string> {
-  const inicio = hojaDeEstilos.indexOf(desde);
-  if (inicio < 0) throw new Error(`src/index.css no tiene "${desde}"`);
-  const bloque = hojaDeEstilos.slice(inicio, hojaDeEstilos.indexOf('}', inicio));
-  return Object.fromEntries([...bloque.matchAll(/--color-([a-z-]+):\s*([^;]+);/g)].map(([, token, valor]) => [token, valor.trim().toUpperCase()]));
-}
-
-// En index.css el modo claro está en @theme y el oscuro en el :root del media query.
+/** Colores `--color-*: light-dark(claro, oscuro)` de index.css, en mayúsculas, separados por modo. */
+const colores = [...hojaDeEstilos.matchAll(/--color-([a-z-]+):\s*light-dark\((#[0-9a-f]{6}),\s*(#[0-9a-f]{6})\);/gi)];
 const real: Record<Modo, Record<string, string>> = {
-  claro: coloresDelBloque('@theme static {'),
-  oscuro: coloresDelBloque('@media (prefers-color-scheme: dark)'),
+  claro: Object.fromEntries(colores.map(([, token, claro]) => [token, claro.toUpperCase()])),
+  oscuro: Object.fromEntries(colores.map(([, token, , oscuro]) => [token, oscuro.toUpperCase()])),
 };
 
 const lineal = (canal: number) => (canal <= 0.04045 ? canal / 12.92 : ((canal + 0.055) / 1.055) ** 2.4);

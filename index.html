@@ -10,6 +10,13 @@
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%234f46e5'/%3E%3Cpath d='M10 8v9a6 6 0 0 0 12 0V8' fill='none' stroke='%23fff' stroke-width='3.5' stroke-linecap='round'/%3E%3C/svg%3E"
     />
     <title>Mi U</title>
+    <!-- Aplica el tema guardado antes de pintar, para que no parpadee. -->
+    <script>
+      try {
+        var t = localStorage.getItem('mi-u-tema');
+        if (t === 'claro' || t === 'oscuro') document.documentElement.dataset.tema = t;
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

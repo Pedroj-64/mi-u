@@ -13,7 +13,9 @@ Panel personal para organizar la vida universitaria en un solo lugar: entregas, 
 - **Aula virtual (Moodle):** enlace al aula de cada materia.
 - **Classroom:** acceso a Google Classroom y enlace por materia.
 - **Drive:** acceso rápido a Google Drive y a carpetas o enlaces que uses seguido.
-- **Materias:** agrega o quita materias; aparecen en todas las secciones.
+- **Materias:** agrega, quita y reordena materias (arrastrándolas o con las flechas); aparecen en todas las secciones.
+- **Respaldo:** exporta e importa tus datos en JSON; borrar o importar se puede deshacer.
+- **Atajos de teclado:** `/` busca entregas y `n` empieza una entrega nueva.
 
 Los datos se guardan en el `localStorage` del navegador. No hay servidor ni cuentas.
 
@@ -39,11 +41,11 @@ Para usarla, abre `mi-u.html` en cualquier navegador moderno.
 - [x] Rediseño visual con modo claro y oscuro
 - [x] Vista semanal de entregas
 - [x] Filtros y búsqueda
-- [ ] Ordenar materias arrastrándolas
+- [x] Ordenar materias arrastrándolas
 - [x] Exportar e importar datos en JSON
 - [x] Deshacer al borrar
 - [x] Pruebas unitarias para la lógica de fechas y estados
-- [ ] Atajos de teclado
+- [x] Atajos de teclado
 
 ## Pendientes
 

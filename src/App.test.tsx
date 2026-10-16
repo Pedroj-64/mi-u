@@ -551,3 +551,29 @@ describe('Deshacer y respaldo', () => {
     expect(within(seccion('Mis materias')).queryByText('Física')).not.toBeInTheDocument();
   });
 });
+
+describe('Orden de materias y atajos', () => {
+  it('sube una materia con su botón y se guarda', async () => {
+    const { usuario, guardado } = montar({ materias: [materia('m1', 'Física'), materia('m2', 'Química')], entregas: [], drive: [] });
+
+    await usuario.click(screen.getByRole('button', { name: 'Subir Química' }));
+    expect(guardado().materias.map((m) => m.nombre)).toEqual(['Química', 'Física']);
+    expect(screen.getByRole('button', { name: 'Subir Química' })).toBeDisabled();
+  });
+
+  it('"n" y "/" enfocan los campos, pero no mientras se escribe', async () => {
+    const { usuario } = montar({
+      materias: [materia('m1', 'Física')],
+      entregas: [entrega('e1', 'm1', 'Taller', '2026-10-20T20:00:00-05:00')],
+      drive: [],
+    });
+
+    await usuario.keyboard('n');
+    expect(screen.getByLabelText('Descripción')).toHaveFocus();
+    await usuario.keyboard('/');
+    expect(screen.getByLabelText('Descripción')).toHaveValue('/');
+    screen.getByLabelText('Descripción').blur();
+    await usuario.keyboard('/');
+    expect(screen.getByLabelText('Buscar entregas')).toHaveFocus();
+  });
+});

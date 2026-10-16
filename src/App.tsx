@@ -10,6 +10,7 @@ import Materias from './components/Materias.tsx';
 import Respaldo from './components/Respaldo.tsx';
 import { botonIcono, botonSecundario } from './components/estilos.ts';
 import { useAhora } from './hooks/useAhora.ts';
+import { useAtajos } from './hooks/useAtajos.ts';
 import { useAvisos } from './hooks/useAvisos.ts';
 import {
   agregarDrive,
@@ -19,6 +20,7 @@ import {
   borrarEntrega,
   guardarEnlace,
   marcarAvisadas,
+  moverMateria,
   nombreMateria,
   quitarDrive,
   quitarMateria,
@@ -30,6 +32,7 @@ import type { Store } from './lib/store.ts';
 export default function App({ store }: { store: Store }) {
   const { datos, avisos, deshacer } = useSyncExternalStore(store.suscribir, store.obtener);
   const ahora = useAhora();
+  useAtajos();
   const nombreDe = (id: string) => nombreMateria(datos.materias, id);
   const avisosNavegador = useAvisos(datos.entregas, nombreDe, (ids) => store.actualizar((d) => marcarAvisadas(d, ids)));
   const guardarEnlaceDe = (id: string, campo: CampoEnlace, url: string) =>
@@ -75,6 +78,7 @@ export default function App({ store }: { store: Store }) {
           materias={datos.materias}
           onAgregar={(nombre) => store.actualizar((d) => agregarMateria(d, nombre))}
           onQuitar={(id) => store.actualizar((d) => quitarMateria(d, id), 'Materia quitada')}
+          onMover={(id, destino) => store.actualizar((d) => moverMateria(d, id, destino))}
         />
         <Respaldo
           className="md:col-span-2 lg:col-span-6"

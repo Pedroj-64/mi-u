@@ -1,9 +1,26 @@
+<div align="center">
+
+<img src="docs/img/logo.svg" alt="Logo animado de Mi U: una U que se dibuja y se marca como entregada" width="120" height="120">
+
 # Mi U
 
-Panel personal para organizar la vida universitaria en un solo lugar: entregas, clases virtuales, aulas de Moodle, Google Classroom y Google Drive.
+**Tu vida universitaria en un solo panel.**
+Entregas, clases virtuales, Moodle, Classroom y Drive, sin cuentas ni servidores.
 
 ![Estado](https://img.shields.io/badge/estado-en%20desarrollo-yellow)
 ![Licencia](https://img.shields.io/badge/licencia-MIT-blue)
+![React](https://img.shields.io/badge/React-19-61dafb?logo=react&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6?logo=typescript&logoColor=white)
+![Datos](https://img.shields.io/badge/datos-solo%20en%20tu%20navegador-4f46e5)
+
+[Funciones](#funciones) · [Así se ve](#así-se-ve) · [Instalación](#instalación-y-uso) · [Privacidad](#datos-y-privacidad) · [Desarrollo](#desarrollo)
+
+<img src="docs/img/demo.gif" alt="Demostración: agregar una entrega con el atajo n, filtrar vencidas, buscar y cambiar de tema" width="760">
+
+<sub>Atajo `n` para una entrega nueva, filtro de vencidas, búsqueda con `/` y cambio de tema.
+<a href="docs/img/demo.mp4">Ver el video en mejor calidad</a>.</sub>
+
+</div>
 
 ## Funciones
 
@@ -21,6 +38,21 @@ Panel personal para organizar la vida universitaria en un solo lugar: entregas, 
 - **Atajos de teclado:** `/` busca entregas y `n` empieza una entrega nueva.
 
 Todas las fechas se calculan y se muestran en hora de Bogotá (UTC−5), aunque el equipo esté en otra zona horaria.
+
+## Así se ve
+
+| Claro | Oscuro |
+|---|---|
+| <img src="docs/img/claro.png" alt="Mi U en tema claro" width="480"> | <img src="docs/img/oscuro.png" alt="Mi U en tema oscuro" width="480"> |
+
+<details>
+<summary>En el celular</summary>
+
+<img src="docs/img/movil.png" alt="Mi U en una pantalla de celular, con las secciones apiladas" width="300">
+
+</details>
+
+Las capturas usan datos de ejemplo.
 
 ## Requisitos
 
@@ -90,6 +122,7 @@ src/
   index.css     paleta y estilos base (Tailwind CSS)
 docs/
   diseno.md     paleta, contraste, tipografía, iconos y reglas de la interfaz
+  img/          logo animado, capturas y video de la demo
 mi-u.html       versión anterior, en un solo archivo
 ```
 

@@ -10,7 +10,7 @@ Entregas, clases virtuales, Moodle, Classroom y Drive, sin cuentas ni servidores
 ![Estado](https://img.shields.io/badge/estado-en%20desarrollo-yellow)
 ![Licencia](https://img.shields.io/badge/licencia-MIT-blue)
 ![React](https://img.shields.io/badge/React-19-61dafb?logo=react&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6?logo=typescript&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-6-3178c6?logo=typescript&logoColor=white)
 ![Datos](https://img.shields.io/badge/datos-solo%20en%20tu%20navegador-4f46e5)
 
 [Funciones](#funciones) · [Así se ve](#así-se-ve) · [Instalación](#instalación-y-uso) · [Privacidad](#datos-y-privacidad) · [Desarrollo](#desarrollo)
